@@ -1,7 +1,5 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
-
-#ifndef order_manager_h
-#define order_manager_h
+﻿#ifndef ORDER_MANAGER_H
+#define ORDER_MANAGER_H
 
 #include <stdio.h>
 #include <conio.h>
@@ -12,156 +10,112 @@
 
 #define MAXSIZE 100
 
-#define DH_HOATOC 1
-#define DH_VIP 2
-#define DH_THUONG 3
+// Enums 
 
-#define KH_HOATOC 2
-#define KH_VIP 1
-#define KH_THUONG 0
+typedef enum {
+    PRIORITY_NORMAL  = 0,
+    PRIORITY_VIP     = 1,
+    PRIORITY_EXPRESS = 2
+} PriorityLevel;
 
-typedef char KeyType[100];
-typedef long long ItemLongType;
+typedef enum {
+    TIER_NORMAL  = 0,
+    TIER_VIP     = 1,
+    TIER_EXPRESS = 2
+} CustomerTier;
 
-//QUAN LY KHO HANG SAN PHAM
-struct KhoHangSanPham {
-	int MaSP;
-	KeyType TenSP;
-	int SoLuongTonTai;
-	ItemLongType DonGia;	
-	int SoLuongDaBan;
-};
-extern KhoHangSanPham kho[MAXSIZE];
-extern int nSP;
-//QUAN LY DANH SACH DON HANG QUEUE
-struct DanhSachDonHang {
-	int MaDonHang;
-	KeyType TenKH;
-	KeyType TenSP;
-	int SoLuong;
-	ItemLongType DonGia;
-	int UuTien;
-};
+// Custom type definitions
+typedef char NameType[100];
+typedef long long AmountType;
 
-typedef DanhSachDonHang DonHang;
+// Product / Inventory
+typedef struct Product {
+    int id;
+    NameType name;
+    int stock_quantity;
+    AmountType price;    
+    int sold_quantity;
+} Product;
 
-struct SNodeDonHang {
-	DonHang Info;
-	SNodeDonHang* Next;
-};
+extern Product inventory[MAXSIZE];
+extern int product_count;
 
-struct ListDonHang {
-	SNodeDonHang* Head = NULL;
-	SNodeDonHang* Tail = NULL;
-};
-//QUAN LY DANH SACH KHACH HANG DSLK
-struct DanhSachKhachHang {
-	int MaKH;
-	KeyType TenKH;
-	KeyType SoDienThoai;
-	int UuTienKH; //1 - HỎA TỐC , 2 - VIP , 3 - THƯỜNG
-	KeyType TrangThai;
-	ListDonHang LichSuDH;
-	ItemLongType TongTien;
-};
+// Order / Queue
+typedef struct Order {
+    int id;
+    NameType customer_name;
+    NameType product_name;
+    int quantity;
+    AmountType price;
+    PriorityLevel priority;
+} Order;
 
-typedef DanhSachKhachHang KhachHang;
+typedef struct OrderNode {
+    Order info;
+    struct OrderNode* next;
+} OrderNode;
 
-struct SNodeKhachHang {
-	KhachHang Info;
-	SNodeKhachHang* Next;
-};
-struct ListKhachHang {
-	SNodeKhachHang* Head = NULL;
-	SNodeKhachHang* Tail = NULL;
-};
+typedef struct OrderQueue {
+    OrderNode* head;
+    OrderNode* tail;
+} OrderQueue;
 
-//INIT QUEUE
-void InitQueueDH(ListDonHang& ldh);
-//KIEM TRA DANH SACH RONG
-int IsEmptyDH(ListDonHang& ldh);
-//TAO KHACH HANG
-SNodeKhachHang* CreateKhachHang(KhachHang x);
-//KIEM TRA KHACH HANG RONG
-int IsEmptyKH(ListKhachHang& lkh);
-//TAO DON HANG
-SNodeDonHang* CreateDonHang(DonHang x);
-//TAO KHO HANG BANG MANG
-void CreateKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP);
-//TAO KHACH HANG BANG DSLK
-int InsertTaiL_KhachHang(ListKhachHang& lkh, KhachHang kh);
-//TAO DON HANG BANG ENQUEUE(THEM)
-int EnqueueDonHang(ListDonHang& ldh, DonHang dh);
-//THEM DON HANG
-void InsertTail_DonHang(ListDonHang& ldh);
-//THEM KHACH HANG
-void DangKy_ThanhVienMoi(ListKhachHang& lkh);
-//DOC 1 FILE SAN PHAM
-void Load1File_SanPham(KhoHangSanPham kho[MAXSIZE], FILE* fi);
-//DOC FILE SAN PHAM
-void LoadFile_SanPham(KeyType TenFILE, KhoHangSanPham kho[MAXSIZE], int& nSP);
-//DOC 1 FILE KHACH HANG
-void Load1File_KhachHang(FILE* fi, KhachHang& kh);
-//DOC FILE KHACH HANG
-void LoadFile_KhachHang(KeyType TenFILE, ListKhachHang& lkh, int& n);
-//XOA DON HANG(DEQUEUE)
-int DequeueXuLyDonHang(ListDonHang& ldh);
-//TIM KIEM DON HANG (MADON)
-SNodeDonHang* TimKiem_MaDon(ListDonHang& ldh, int ma, DonHang& dh);
-//TIM KIEM DON HANG (TenKH)
-SNodeKhachHang* TimKiem_TenKhachHang(ListKhachHang& ldh, KeyType ten, KhachHang& kh);
-//TIM KIEM MA SAN PHAM 
-int TimKiem_MaSP(KhoHangSanPham kho[MAXSIZE], int& nSP, int masp);
-//NHAP KHO HANG
-void NhapKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP);
-//CAP NHAT KHO HANG
-void CapNhatKho(KhoHangSanPham kho[MAXSIZE], int& nSP);
-//SAP XEP GIAM DAN SAN PHAM THEO SO LUONG
-void SwapKhoHang(KhoHangSanPham& a, KhoHangSanPham& b);
-void SapXepSoluong_SanPham_GiamDan(KhoHangSanPham kho[MAXSIZE], int& nSP);
-//SAP XEP GIAM DAN SAN PHAM THEO SO LUONG
-void SwapKhachHang(KhachHang& a, KhachHang& b);
-void SapXepTongTien_KhachHang_GiamDan(ListKhachHang& lkh);
-//XUAT DANH SACH KHO HANG SAN PHAM
-void XuatKhoHangSanPham(KhoHangSanPham kho[MAXSIZE], int& nSP);
-//IN 1 DON HANG
-void in1DonHang(DonHang dh);
-//XUAT DANH SACH DON HANG
-void XuatDonHang(ListDonHang& ldh);
-//IN 1 KHACH HANG
-void in1KhachHang(KhachHang kh);
-//XUAT DANH SACH KHACH HANG
-void XuatKhachHang(ListKhachHang& lkh);
-//NÂNG HẠNG THÀNH VIÊN TỰ ĐỘNG
-void NangHang_ThanhVienTuDong(ListKhachHang& lkh);
-//TAO DANH SACH DON HANG
-void InputYourHand_InsertTailDonHang(ListDonHang& ldh);
-//MENU
-void menu();
-void menuKhachHang();
-void menuDonHang();
-void menuKhoSanPham();
-void menuSapXep_TimKiem();
-void menuThongKe();
-//TIEU DE KHO HANG
-void TieuDeKhoHang();
-//TIEU DE DON HANG
-void TieuDeDonHang();
-//TIEU DE KHACH HANG
-void TieuDeKhachHang();
-//COLOR
-void color(int color);
+// Customer / Linked list
+typedef struct Customer {
+    int id;
+    NameType name;
+    NameType phone;
+    CustomerTier tier;   
+    NameType status;
+    OrderQueue history;
+    AmountType total_spent;
+} Customer;
+
+typedef struct CustomerNode {
+    Customer info;
+    struct CustomerNode* next;
+} CustomerNode;
+
+typedef struct CustomerList {
+    CustomerNode* head;
+    CustomerNode* tail;
+} CustomerList;
+
+// Function Prototypes
+
+// Initialization
+void initOrderQueue(OrderQueue* q);
+void initCustomerList(CustomerList* l);
+
+// Memory Allocation
+OrderNode* createOrderNode(Order x);
+CustomerNode* createCustomerNode(Customer x);
+
+// File I/O 
+void loadInventoryFile(const char* filename, Product inv[], int* count);
+void loadCustomerFile(const char* filename, CustomerList* list, int* count);
+
+// Core Logic
+int enqueueOrder(OrderQueue* q, Order x);
+int dequeueOrder(OrderQueue* q, Order* out_order);
+void insertCustomerTail(CustomerList* l, Customer x);
+void autoUpgradeCustomerTier(CustomerList* l);
+
+// Search & Sort
+int findProductById(Product inv[], int count, int id);
+CustomerNode* findCustomerByName(CustomerList* l, const char* name);
+void sortProductsBySalesDesc(Product inv[], int count);
+void sortCustomersBySpentDesc(CustomerList* l);
+
+// UI & Menu
+void showMainMenu();
+void displayInventory(Product inv[], int count);
+void displayOrderQueue(OrderQueue* q);
+void displayCustomerList(CustomerList* l);
+
+// Utilities
+void setColor(int color_code);
+void clearScreen();
 void pause();
-//PROCESS 
-void process();
-//PROCESS DON HANG
-void processKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP);
-//PROCES KHO HANG SAN PHAM
-void processDonHang(ListDonHang& ldh);
-//PROCESS TIM KIEM - SAP XEP
-void processTimKiemSapXep(ListDonHang& ldh, ListKhachHang& lkh);
-//PROCESS KHACH HANG
-void processKhachHang(ListKhachHang& lkh);
-//PROCESS THONG KE
-void processThongKe();
+
 #endif
