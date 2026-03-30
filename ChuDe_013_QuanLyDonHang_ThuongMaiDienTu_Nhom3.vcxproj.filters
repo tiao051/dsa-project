@@ -15,46 +15,55 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="QuanLy_DonHangThuongMaiDienTu.h">
+    <ClInclude Include="include\order_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="menu.cpp">
+    <ClCompile Include="src\advanced_features.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\app_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CreateKhoSanPham.cpp">
+    <ClCompile Include="src\customer_linked_list.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CreateDonHang.cpp">
+    <ClCompile Include="src\customer_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FILE.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DSLK_KhachHang.cpp">
+    <ClCompile Include="src\order_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TimKiem_SapXep.cpp">
+    <ClCompile Include="src\order_queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ChucNangNangCao.cpp">
+    <ClCompile Include="src\menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Queue_DonHang.cpp">
+    <ClCompile Include="src\inventory_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TieuDe.cpp">
+    <ClCompile Include="src\file_handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main_con.cpp">
+    <ClCompile Include="src\search_sort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CreateKhachHang.cpp">
+    <ClCompile Include="src\ui_header.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data\customers.txt" />
+    <Text Include="data\inventory.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+    <None Include="UpgradeLog.htm" />
+    <None Include="UpgradeLog2.htm" />
   </ItemGroup>
 </Project>

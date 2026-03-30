@@ -20,7 +20,6 @@ void initOrderQueue(OrderQueue* q) {
 	q->head = q->tail = NULL;
 }
 
-
 // Core Operations - Order Queue
 int enqueueOrder(OrderQueue* q, Order order) {
 	OrderNode* node = createOrderNode(order);

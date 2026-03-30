@@ -1,5 +1,11 @@
 #include "../include/order_manager.h"
 
+void initCustomerList(CustomerList* l) {
+	if (l == NULL) return;
+	l->head = NULL;
+	l->tail = NULL;
+}
+
 CustomerNode* createCustomerNode(Customer customer) {
 	CustomerNode* node = new CustomerNode();
 	if (node == NULL) return NULL;

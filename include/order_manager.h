@@ -1,4 +1,6 @@
-﻿#ifndef ORDER_MANAGER_H
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#ifndef ORDER_MANAGER_H
 #define ORDER_MANAGER_H
 
 #include <stdio.h>
@@ -37,11 +39,6 @@ typedef struct Product {
     AmountType price;    
     int sold_quantity;
 } Product;
-
-extern Product inventory[MAXSIZE];
-extern int product_count;
-extern OrderQueue order_queue;
-extern CustomerList customer_list;
 
 // Order / Queue
 typedef struct Order {
@@ -84,8 +81,13 @@ typedef struct CustomerList {
     CustomerNode* tail;
 } CustomerList;
 
-// Function Prototypes
+extern Product inventory[MAXSIZE];
+extern int product_count;
+extern OrderQueue order_queue;
+extern CustomerList customer_list;
 
+
+// Function Prototypes
 // Initialization
 void initOrderQueue(OrderQueue* q);
 void initCustomerList(CustomerList* l);

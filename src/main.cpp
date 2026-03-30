@@ -40,7 +40,7 @@ void startApp() {
 			printf("\n");
 			printf("\n");
 			printf("\n");
-			color(4);
+			setColor(4);
 			printf("\t");
 			printf("\t");
 			printf("\t");

@@ -7,48 +7,50 @@ const char* CUSTOMER_FILE = "data/customers.txt";
 // ================= INVENTORY MANAGEMENT =================
 void processInventory(Product inventory[MAXSIZE], int* product_count) {
 	int choice;
-	*product_count = 0;
+	//*product_count = 0;
 	do {
 		system("cls");
 		menuInventory();
-	setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
-		case 1:
-			setColor(7);
-			loadInventoryFile(INVENTORY_FILE, inventory, product_count);
-			displayInventory(inventory, *product_count);
-			pause();
-			break;
-		case 2:
-			setColor(7);
-			importStock(inventory, product_count);
-			pause();
-			break;
-		case 3:
-			// TODO: Implementation for import stock
-			break;
-		case 4:
-			setColor(7);
-			updateInventory(inventory, product_count);
-			pause();
-			break;
-		case 5:
-			setColor(7);
-			displayInventory(inventory, *product_count);
-			pause();
-			break;
+		setColor(10);
+		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
+		scanf("%d", &choice);
 
-		case 0:
-			setColor(10);
-			system("cls");
-		printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
-			break;
-		default:
-			setColor(4);
-			system("cls");
-		printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
-			break;
+		switch (choice) {
+			case 1:
+				setColor(7);
+				loadInventoryFile(INVENTORY_FILE, inventory, product_count);
+				displayInventory(inventory, *product_count);
+				pause();
+				break;
+			case 2:
+				setColor(7);
+				importStock(inventory, product_count);
+				pause();
+				break;
+			case 3:
+				// TODO: Implementation for import stock
+				break;
+			case 4:
+				setColor(7);
+				updateInventory(inventory, product_count);
+				pause();
+				break;
+			case 5:
+				setColor(7);
+				displayInventory(inventory, *product_count);
+				pause();
+				break;
+			case 0:
+				setColor(10);
+				system("cls");
+				printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+				break;
+			default:
+				setColor(4);
+				system("cls");
+				printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+				break;
 		}
-
 	} while (choice != 0);
 }
 
@@ -59,7 +61,8 @@ void processOrder(OrderQueue* q) {
 	do {
 		system("cls");
 		menuOrder();
-		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
+		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
+		scanf("%d", &choice);
 
 		switch (choice) {
 		case 1:
@@ -97,29 +100,34 @@ void processOrder(OrderQueue* q) {
 
 // ============ SEARCH & SORT =================
 void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
-	Order order;
-	Customer customer;
 	int choice;
+	char search_name[100];
+	OrderNode* foundOrderNode = NULL;
+	CustomerNode* foundCustomerNode = NULL;
 
 	do {
 		system("cls");
 		menuSearchSort();
-		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
+		setColor(10); 
+		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
+		scanf("%d", &choice);
 
 		switch (choice) {
-		case 1:
+		case 1: 
 			setColor(7);
 			printf("\n\t\t\t\t\t\tNHAP MA DON: ");
 			scanf("%d", &search_order_id);
 			getchar();
 
-			if (findOrderById(order_queue, search_order_id) != NULL) {
-				printf("\n\t\t\t\t\t\tTIM THANH CONG!\n");
+			foundOrderNode = findOrderById(order_queue, search_order_id);
+
+			if (foundOrderNode != NULL) {
+				printf("\n\t\t\t\t\t\tORDER FOUND!\n");
 				printOrderHeader();
-				printSingleOrder(order);
+				printSingleOrder(foundOrderNode->info);
 			}
 			else {
-				printf("\n\t\t\t\t\t\tKHONG TIM THAY!\n");
+				printf("\n\t\t\t\t\t\tORDER NOT FOUND!\n");
 			}
 			pause();
 			break;
@@ -127,16 +135,18 @@ void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 			setColor(7);
 			printf("\n\t\t\t\t\t\tNHAP TEN KHACH HANG: ");
 			getchar();
-			fgets(customer.name, sizeof(customer.name), stdin);
-			customer.name[strlen(customer.name) - 1] = '\0';
+			fgets(search_name, sizeof(search_name), stdin);
+			search_name[strcspn(search_name, "\n")] = '\0';
 
-			if (findCustomerByName(customer_list, customer.name) != NULL) {
-				printf("\n\t\t\t\t\t\tTIM THANH CONG!\n");
+			foundCustomerNode = findCustomerByName(customer_list, search_name);
+
+			if (foundCustomerNode != NULL) {
+				printf("\n\t\t\t\t\t\tTIM THAY KHACH HANG!\n");
 				printCustomerHeader();
-				printSingleCustomer(customer);
+				printSingleCustomer(foundCustomerNode->info);
 			}
 			else {
-				printf("\n\t\t\t\t\t\tKHONG TIM THAY!\n");
+				printf("\n\t\t\t\t\t\tCUSTOMER NOT FOUND!\n");
 			}
 			pause();
 			break;
@@ -172,7 +182,9 @@ void processCustomer(CustomerList* customer_list) {
 	do {
 		system("cls");
 		menuCustomer();
-		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
+		setColor(10); 
+		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
+		scanf("%d", &choice);
 		switch (choice) {
 		case 1:
 			setColor(7);
@@ -215,7 +227,9 @@ void processStatistics() {
 	do {
 		system("cls");
 		menuStatistics();
-		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
+		setColor(10); 
+		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
+		scanf("%d", &choice);
 		switch (choice) {
 		case 1:break;
 		case 2:break;

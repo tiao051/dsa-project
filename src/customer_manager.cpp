@@ -61,4 +61,4 @@ void displayCustomerList(CustomerList* customer_list) {
 }
 
 // Auto-upgrade customer tier
-void autoUpgradeCustomerTier(CustomerList* customer_list) {
+void autoUpgradeCustomerTier(CustomerList* customer_list) {}

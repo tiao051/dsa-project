@@ -23,32 +23,35 @@ void createInventory(Product inventory[MAXSIZE], int& nSP) {
 	printf("\n\t\t\t\t\t\t->THEM KHO HANG THANH CONG");
 
 }
-void displayInventory(Product inventory[MAXSIZE], int& nSP) {
-	int masp, soluong;
 
-	printf("\n\t\t\t\t\t\tNhap ma san pham: ");
-	scanf("%d", &masp);
+void importStock(Product inventory[MAXSIZE], int* product_count) {
+	int product_id, additional_quantity;
 
-	int find = findProductById(inventory, nSP, masp);
-	if (find == -1) {
-		printf("\n\t\t\t\t\t\tKHONG TIM THAY MASP");
+	printf("\n\t\t\t\t\t\tENTER PRODUCT ID TO IMPORT: ");
+	scanf("%d", &product_id);
+
+	int index = findProductById(inventory, *product_count, product_id);
+
+	if (index == -1) {
+		printf("\n\t\t\t\t\t\tPRODUCT ID NOT FOUND!");
 		return;
 	}
 	else {
-		printf("\n\t\t\t\t\t\tSO LUONG NHAP THEM: ");
-		scanf("%d", &soluong);
-		getchar();
+		printf("\n\t\t\t\t\t\tQUANTITY TO ADD: ");
+		scanf("%d", &additional_quantity);
+		while (getchar() != '\n');
 
-		if (soluong <= 0) {
-			printf("\n\t\t\t\t\t\tLOI NHAP SO LUONG !!!!");
+		if (additional_quantity <= 0) {
+			printf("\n\t\t\t\t\t\tERROR: INVALID QUANTITY!");
 			return;
 		}
 		else {
-			inventory[find].stock_quantity += soluong;
-			printf("\n\t\t\t\t\t\tDa cap nhat so luong. Tong cong: %d", inventory[find].stock_quantity);
+			inventory[index].stock_quantity += additional_quantity;
+			printf("\n\t\t\t\t\t\tSUCCESS! NEW STOCK: %d", inventory[index].stock_quantity);
 		}
 	}
 }
+
 void updateInventory(Product inventory[MAXSIZE], int* product_count) {
 	int product_id;
 	AmountType new_price;
