@@ -1,0 +1,51 @@
+# Visual Studio temporary/user files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output folders
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# MSBuild intermediate/output files
+*.obj
+*.iobj
+*.ipdb
+*.pdb
+*.idb
+*.ilk
+*.tlog
+*.lastbuildstate
+*.log
+*.tmp
+*.cache
+*.recipe
+
+# Executables and libraries
+*.exe
+*.dll
+*.lib
+*.exp
+
+# Visual C++ browse/database files
+*.VC.db
+*.VC.VC.opendb
+*.opendb
+*.aps
+*.ncb
+*.sdf
+*.ipch/
+
+# CMake/Ninja (safe to ignore if not used)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+build/
+out/
+
+# Upgrade logs
+UpgradeLog*.htm
