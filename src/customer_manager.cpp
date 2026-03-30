@@ -54,21 +54,20 @@ void registerNewCustomer(CustomerList* customer_list) {
 	// Set default tier to Normal
 	customer.tier = TIER_NORMAL;
 
-	strcpy(customer.status, "Active");
+	strcpy(customer.status, "Hoat dong");
 
 	initOrderQueue(&customer.history);
 	customer.total_spent = 0;
 
 	// Automatically generate user id
 	generateUUID(customer.id);
-	printf("\n\t\t\t\t\t\tID: %s", customer.id);
 
 	if (insertCustomerTail(customer_list, customer)) {
 		printf("\n\t\t\t\t\t\t->THEM KHACH HANG THANH CONG");
 		printf("\n\t\t\t\t\t\tID: %s", customer.id);
 		printf("\n\t\t\t\t\t\tLevel: Khach vang lai (Mac dinh)");
 		printf("\n\t\t\t\t\t\tTrang thai: %s (Mac dinh)", customer.status);
-		saveCustomerListToFile("data/customers.txt", customer_list);
+		appendCustomerToFile("data/customers.txt", &customer);
 	}
 	else {
 		printf("\n\t\t\t\t\t\t-> DANG KY THAT BAI!\n");
