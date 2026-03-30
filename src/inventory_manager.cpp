@@ -21,17 +21,38 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 
 		if (strlen(inventory[*nSP].name) == 0) {
 			setColor(4); printf("\t\t\t\t\t\t[!] Ten san pham khong duoc de trong!\n"); setColor(7);
+			continue;
+		}
+
+		bool exists = false;
+		for (int i = 0; i < *nSP; i++) {
+			if (_stricmp(inventory[i].name, inventory[*nSP].name) == 0) {
+				exists = true;
+				break;
+			}
+		}
+
+		if (exists) {
+			setColor(4); printf("\t\t\t\t\t\t[!] San pham da ton tai trong kho!\n"); setColor(7);
+			inventory[*nSP].name[0] = '\0'; // Clear name to trigger re-entry
 		}
 	} while (strlen(inventory[*nSP].name) == 0);
 
 	// Validate stock quantity
 	do {
-		printf("\n\t\t\t\t\t\tNhap so luong ton tai: ");
-		scanf("%d", &inventory[*nSP].stock_quantity);
+		printf("\n\t\t\t\t\t\tNhap so luong san pham: ");
+		if (scanf("%d", &inventory[*nSP].stock_quantity) != 1) {
+			while (getchar() != '\n'); // Clear buffer
+			continue;
+		}
 		getchar();
 
 		if (inventory[*nSP].stock_quantity <= 0) {
 			setColor(4); printf("\t\t\t\t\t\t[!] So luong phai lon hon 0!\n"); setColor(7);
+		}
+		else if (inventory[*nSP].stock_quantity > 1000) { // Giả sử giới hạn là 1000 đơn vị
+			setColor(4); printf("\t\t\t\t\t\t[!] So luong qua lon (Toi da 1000)!\n"); setColor(7);
+			inventory[*nSP].stock_quantity = 0; // Trigger re-entry
 		}
 	} while (inventory[*nSP].stock_quantity <= 0);
 
@@ -79,6 +100,10 @@ void importStock(Product inventory[MAXSIZE], int* product_count) {
 			return;
 		}
 		else {
+			if (inventory[index].stock_quantity + additional_quantity > 1000) {
+				setColor(4); printf("\n\t\t\t\t\t\tTON KHO VUOT QUA GIOI HAN (1000)!"); setColor(7);
+				return;
+			}
 			inventory[index].stock_quantity += additional_quantity;
 			printf("\n\t\t\t\t\t\THANH CONG! SAN PHAM MOI: %d", inventory[index].stock_quantity);
 		}
@@ -86,34 +111,43 @@ void importStock(Product inventory[MAXSIZE], int* product_count) {
 }
 
 void updateInventory(Product inventory[MAXSIZE], int* product_count) {
-	int product_id;
+	char search_name[50];
 	AmountType new_price;
 
-	printf("\n\t\t\t\t\t\tNhap ma san pham: ");
-	scanf("%d", &product_id);
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF);
 
-	int find = findProductById(inventory, *product_count, product_id);
-	if (find == -1) {
-		printf("\n\t\t\t\t\t\tKHONG TIM THAY MASP");
+	printf("\n\t\t\t\t\t\tNhap ten san pham can cap nhat: ");
+	fgets(search_name, sizeof(search_name), stdin);
+	search_name[strcspn(search_name, "\n")] = '\0';
+
+	int find = -1;
+	for (int i = 0; i < *product_count; i++) {
+		if (_stricmp(inventory[i].name, search_name) == 0) {
+			find = i;
+			break;
+		}
+	}
+
+	if (find == -1){
+		printf("\n\t\t\t\t\t\tKHONG TIM THAY SAN PHAM!");
 		return;
 	}
 	else {
-		printf("\n\t\t\t\t\t\tGIA CU: %lld", inventory[find].price);
-
-		printf("\n\t\t\t\t\t\tNHAP GIA MOI: ");
+		printf("\n\t\t\t\t\t\tNhap don gia moi: ");
 		scanf("%lld", &new_price);
 		getchar();
-
 		if (new_price <= 0) {
-			printf("\n\t\t\t\t\t\tGIA KHONG HOP LE!!!");
+			setColor(4); printf("\n\t\t\t\t\t\tDON GIA KHONG HOP LE!"); setColor(7);
 			return;
 		}
 		else {
 			inventory[find].price = new_price;
-			printf("\n\t\t\t\t\t\tDa cap nhat gia thanh: %lld", inventory[find].price);
+			printf("\n\t\t\t\t\t\THANH CONG! DON GIA MOI: %lld", inventory[find].price);
 		}
 	}
 }
+
 void displayInventory(Product inventory[MAXSIZE], int product_count) {
 	printf("\n\t\t\t\t------------------------------------DANH SACH KHO HANG---------------------------------\n");
 	printProductHeader();
