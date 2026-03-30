@@ -122,12 +122,12 @@ void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 			foundOrderNode = findOrderById(order_queue, search_order_id);
 
 			if (foundOrderNode != NULL) {
-				printf("\n\t\t\t\t\t\tORDER FOUND!\n");
+				printf("\n\t\t\t\t\t\tTIM THAY DON HANG!\n");
 				printOrderHeader();
 				printSingleOrder(foundOrderNode->info);
 			}
 			else {
-				printf("\n\t\t\t\t\t\tORDER NOT FOUND!\n");
+				printf("\n\t\t\t\t\t\tKHONG TIM THAY DON DAT HANG!\n");
 			}
 			pause();
 			break;
@@ -146,7 +146,7 @@ void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 				printSingleCustomer(foundCustomerNode->info);
 			}
 			else {
-				printf("\n\t\t\t\t\t\tCUSTOMER NOT FOUND!\n");
+				printf("\n\t\t\t\t\t\tKHONG TIM THAY KHACH HANG!\n");
 			}
 			pause();
 			break;

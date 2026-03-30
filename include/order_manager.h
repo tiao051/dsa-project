@@ -62,7 +62,7 @@ typedef struct OrderQueue {
 
 // Customer / Linked list
 typedef struct Customer {
-    int id;
+    char id[37];
     NameType name;
     NameType phone;
     CustomerTier tier;   
@@ -153,7 +153,6 @@ void menuStatistics();
 // Utilities
 void setColor(int color_code);
 void pause();
-void clearScreen();
 
 // Secondary Process Functions
 void processStatistics();
