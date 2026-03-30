@@ -53,20 +53,21 @@ void registerNewCustomer(CustomerList* customer_list) {
 
 	// Set default tier to Normal
 	customer.tier = TIER_NORMAL;
-	printf("\n\t\t\t\t\t\tTier: Normal (0) (Default)");
 
 	strcpy(customer.status, "Active");
-	printf("\n\t\t\t\t\t\tStatus: %s (Default)", customer.status);
 
 	initOrderQueue(&customer.history);
 	customer.total_spent = 0;
 
 	// Automatically generate user id
 	generateUUID(customer.id);
-	printf("\n\t\t\t\t\t\tGenerated ID: %s", customer.id);
+	printf("\n\t\t\t\t\t\tID: %s", customer.id);
 
 	if (insertCustomerTail(customer_list, customer)) {
 		printf("\n\t\t\t\t\t\t->THEM KHACH HANG THANH CONG");
+		printf("\n\t\t\t\t\t\tID: %s", customer.id);
+		printf("\n\t\t\t\t\t\tLevel: Khach vang lai (Mac dinh)");
+		printf("\n\t\t\t\t\t\tTrang thai: %s (Mac dinh)", customer.status);
 	}
 	else {
 		printf("\n\t\t\t\t\t\t-> DANG KY THAT BAI!\n");
@@ -85,7 +86,7 @@ void printSingleCustomer(Customer customer) {
 }
 // Display all customers
 void displayCustomerList(CustomerList* customer_list) {
-	printf("\t\t\t------------------------------------- CUSTOMER LIST --------------------------------------\n");
+	printf("\t\t\t------------------------------------- DANH SACH KHACH HANG --------------------------------------\n");
 	printCustomerHeader();
 	CustomerNode* node = customer_list->head;
 	while (node != NULL) {
@@ -102,16 +103,13 @@ void autoUpgradeCustomerTier(CustomerList* customer_list) {
 	while (node != NULL) {
 		Customer* customer = &node->info;
 		
-		// Upgrade tier based on total spent
-		// TIER_EXPRESS: >= 10,000,000
 		if (customer->total_spent >= 10000000) {
 			customer->tier = TIER_EXPRESS;
 		}
-		// TIER_VIP: >= 3,000,000 and < 10,000,000
 		else if (customer->total_spent >= 3000000) {
 			customer->tier = TIER_VIP;
 		}
-		// TIER_NORMAL: < 3,000,000
+
 		else {
 			customer->tier = TIER_NORMAL;
 		}
