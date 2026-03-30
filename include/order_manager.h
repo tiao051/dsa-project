@@ -105,6 +105,7 @@ void loadProductRecord(Product inv[], FILE* file_ptr);
 void loadInventoryFile(const char* filename, Product inv[], int* count);
 void loadCustomerRecord(FILE* file_ptr, Customer* customer_ptr);
 void loadCustomerFile(const char* filename, CustomerList* list, int* count);
+void saveCustomerListToFile(const char* filename, CustomerList* list);
 
 // Core Operations - Order Queue
 int enqueueOrder(OrderQueue* q, Order x);

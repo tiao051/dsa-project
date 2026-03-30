@@ -68,6 +68,7 @@ void registerNewCustomer(CustomerList* customer_list) {
 		printf("\n\t\t\t\t\t\tID: %s", customer.id);
 		printf("\n\t\t\t\t\t\tLevel: Khach vang lai (Mac dinh)");
 		printf("\n\t\t\t\t\t\tTrang thai: %s (Mac dinh)", customer.status);
+		saveCustomerListToFile("data/customers.txt", customer_list);
 	}
 	else {
 		printf("\n\t\t\t\t\t\t-> DANG KY THAT BAI!\n");

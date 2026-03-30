@@ -55,3 +55,38 @@ void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 
 	fclose(file_ptr);
 }
+
+// Save entire customer list to file
+void saveCustomerListToFile(const char* filename, CustomerList* list) {
+	FILE* file_ptr = fopen(filename, "wt");
+	if (file_ptr == NULL) {
+		printf("\n\t\t\t\t\t\tKhong the luu thong tin khach hang %s", filename);
+		return;
+	}
+
+	// Count total customers
+	int count = 0;
+	CustomerNode* node = list->head;
+	while (node != NULL) {
+		count++;
+		node = node->next;
+	}
+
+	// Write total count
+	fprintf(file_ptr, "%d\n", count);
+
+	// Write all customer records
+	node = list->head;
+	while (node != NULL) {
+		fprintf(file_ptr, "%s,%s,%s,%d,%s,%lld\n",
+			node->info.id,
+			node->info.name,
+			node->info.phone,
+			node->info.tier,
+			node->info.status,
+			node->info.total_spent);
+		node = node->next;
+	}
+
+	fclose(file_ptr);
+}
