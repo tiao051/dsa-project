@@ -86,7 +86,6 @@ extern int product_count;
 extern OrderQueue order_queue;
 extern CustomerList customer_list;
 
-
 // Function Prototypes
 // Initialization
 void initOrderQueue(OrderQueue* q);

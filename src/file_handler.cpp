@@ -17,7 +17,7 @@ void loadProductRecord(Product inventory[], FILE* file_ptr) {
 void loadInventoryFile(const char* filename, Product inventory[], int* count) {
 	FILE* file_ptr = fopen(filename, "rt");
 	if (file_ptr == NULL) {
-		printf("\nERROR: Cannot read file %s. Please check file path.", filename);
+		printf("\nLoi doc file %s.", filename);
 		return;
 	}
 	fscanf(file_ptr, "%d\n", count);
@@ -38,7 +38,7 @@ void loadCustomerRecord(FILE* file_ptr, Customer* customer_ptr) {
 void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 	FILE* file_ptr = fopen(filename, "rt");
 	if (file_ptr == NULL) {
-		printf("\n\t\t\t\t\t\tERROR: Cannot read file %s. Please check file path.", filename);
+		printf("\n\t\t\t\t\t\tLoi doc file %s.", filename);
 		return;
 	}
 

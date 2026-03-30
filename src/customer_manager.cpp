@@ -84,6 +84,7 @@ void printSingleCustomer(Customer customer) {
 			customer.status,
 			customer.total_spent);
 }
+
 // Display all customers
 void displayCustomerList(CustomerList* customer_list) {
 	printf("\t\t\t------------------------------------- DANH SACH KHACH HANG --------------------------------------\n");
