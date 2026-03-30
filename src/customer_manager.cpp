@@ -24,7 +24,6 @@ int isNumeric(const char* str) {
 // Register new customer
 void registerNewCustomer(CustomerList* customer_list) {
 	Customer customer;
-	int tier_choice;
 	char buffer[100];
 
 	int c;
@@ -52,18 +51,9 @@ void registerNewCustomer(CustomerList* customer_list) {
 		}
 	} while (!isNumeric(customer.phone));
 
-	while (1) {
-		printf("\n\t\t\t\t\t\tTier (2: Express, 1: VIP, 0: Normal): ");
-		if (scanf("%d", &tier_choice) == 1 && (tier_choice >= 0 && tier_choice <= 2)) {
-			customer.tier = (CustomerTier)tier_choice;
-			while (getchar() != '\n'); // Clear buffer
-			break;
-		}
-		else {
-			setColor(4); printf("\t\t\t\t\t\t[!] Please enter 0, 1, or 2.\n"); setColor(7);
-			while (getchar() != '\n');
-		}
-	}
+	// Set default tier to Normal
+	customer.tier = TIER_NORMAL;
+	printf("\n\t\t\t\t\t\tTier: Normal (0) (Default)");
 
 	strcpy(customer.status, "Active");
 	printf("\n\t\t\t\t\t\tStatus: %s (Default)", customer.status);
@@ -106,4 +96,26 @@ void displayCustomerList(CustomerList* customer_list) {
 }
 
 // Auto-upgrade customer tier
-void autoUpgradeCustomerTier(CustomerList* customer_list) {}
+void autoUpgradeCustomerTier(CustomerList* customer_list) {
+	CustomerNode* node = customer_list->head;
+	
+	while (node != NULL) {
+		Customer* customer = &node->info;
+		
+		// Upgrade tier based on total spent
+		// TIER_EXPRESS: >= 10,000,000
+		if (customer->total_spent >= 10000000) {
+			customer->tier = TIER_EXPRESS;
+		}
+		// TIER_VIP: >= 3,000,000 and < 10,000,000
+		else if (customer->total_spent >= 3000000) {
+			customer->tier = TIER_VIP;
+		}
+		// TIER_NORMAL: < 3,000,000
+		else {
+			customer->tier = TIER_NORMAL;
+		}
+		
+		node = node->next;
+	}
+}
