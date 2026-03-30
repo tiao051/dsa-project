@@ -1,30 +1,33 @@
 #include "../include/order_manager.h"
 
-ListDonHang ldh;
-ListKhachHang lkh;
-int luachon;
-void process() {
+// Global data structures
+OrderQueue order_queue;
+CustomerList customer_list;
+Product inventory[MAXSIZE];
+int product_count = 0;
+
+int menu_choice;
+void startApp() {
 
 	do {
-		menu();
-		color(10);
-		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &luachon);
-		switch (luachon) {
+		showMainMenu();
+		setColor(10);
+		printf("\n\t\t\t\t\t\t->SELECT FUNCTION: "); scanf("%d", &menu_choice);
+		switch (menu_choice) {
 		case 1:
-			processKhoHang(kho, nSP);
+			processInventory(inventory, &product_count);
 			break;
 		case 2:
-			processKhachHang(lkh);
+			processCustomer(&customer_list);
 			break;
 		case 3:
-			processDonHang(ldh);
+			processOrder(&order_queue);
 			break;
 		case 4:
-			processTimKiemSapXep(ldh, lkh);
+			processSearchSort(&order_queue, &customer_list);
 			break;
 		case 5:
-
-			processThongKe();
+			processStatistics();
 			break;
 		case 0: 
 			system("cls");
@@ -56,21 +59,19 @@ void process() {
 			pause();
 			break;
 		default:
-			color(4); 
+			setColor(4); 
 			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n"); 
+			printf("\n\t\t\t\t\tYOU EXCEEDED FUNCTION OPTIONS, PLEASE SELECT VALID OPTION\n"); 
 			break;
 		}
-	} while (luachon != 0);
+	} while (menu_choice != 0);
 	
 }
 
 int main() {
-	KhoHangSanPham kho[MAXSIZE];
-	DonHang dh;
-	KhachHang kh;
-	int nSP = 0;
-	InitQueueDH(ldh);
-	process();
+	// Initialize data structures
+	initOrderQueue(&order_queue);
+	initCustomerList(&customer_list);
+	startApp();
 	return 0;
 }

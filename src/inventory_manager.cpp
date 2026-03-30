@@ -1,7 +1,4 @@
 ﻿#include "../include/order_manager.h"
-
-KhoHangSanPham kho[MAXSIZE];
-int nSP = 0;
 void createInventory(Product inventory[MAXSIZE], int& nSP) {
 	printf("\n\t\t\t\t\t\tNhap ma kho hang san pham: ");
 	scanf("%d", &inventory[nSP].id);
@@ -51,14 +48,14 @@ void displayInventory(Product inventory[MAXSIZE], int& nSP) {
 		}
 	}
 }
-void updateInventory(Product inventory[MAXSIZE], int* count) {
-	int masp;
-	AmountType GiaMoi;
+void updateInventory(Product inventory[MAXSIZE], int* product_count) {
+	int product_id;
+	AmountType new_price;
 
 	printf("\n\t\t\t\t\t\tNhap ma san pham: ");
-	scanf("%d", &masp);
+	scanf("%d", &product_id);
 
-	int find = findProductById(inventory, *count, masp);
+	int find = findProductById(inventory, *product_count, product_id);
 	if (find == -1) {
 		printf("\n\t\t\t\t\t\tKHONG TIM THAY MASP");
 		return;
@@ -67,23 +64,23 @@ void updateInventory(Product inventory[MAXSIZE], int* count) {
 		printf("\n\t\t\t\t\t\tGIA CU: %lld", inventory[find].price);
 
 		printf("\n\t\t\t\t\t\tNHAP GIA MOI: ");
-		scanf("%lld", &GiaMoi);
+		scanf("%lld", &new_price);
 		getchar();
 
-		if (GiaMoi <= 0) {
+		if (new_price <= 0) {
 			printf("\n\t\t\t\t\t\tGIA KHONG HOP LE!!!");
 			return;
 		}
 		else {
-			inventory[find].price = GiaMoi;
+			inventory[find].price = new_price;
 			printf("\n\t\t\t\t\t\tDa cap nhat gia thanh: %lld", inventory[find].price);
 		}
 	}
 }
-void displayInventory(Product inventory[MAXSIZE], int& nSP) {
+void displayInventory(Product inventory[MAXSIZE], int product_count) {
 	printf("\n\t\t\t\t------------------------------------DANH SACH KHO HANG---------------------------------\n");
-	TieuDeKhoHang();
-	for (int i = 0; i < nSP; i++)
+	printProductHeader();
+	for (int i = 0; i < product_count; i++)
 	{
 		printf("\t\t\t\t| SP%-14d | %-25s | %-12d | %-10lld | %8d |\n",
 			inventory[i].id,

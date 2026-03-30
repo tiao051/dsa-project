@@ -1,15 +1,15 @@
 ﻿#include "../include/order_manager.h"
 
-void menu() {
-	color(12);
+void showMainMenu() {
+	setColor(12);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|                   NHOM 3 - CHU DE 13                |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	color(5);
+	setColor(5);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|     DE TAI: QUAN LY DON HANG THUONG MAI DIEN TU     |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	color(8);
+	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|     HE THONG QUAN LY DON HANG THUONG MAI DIEN TU    |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
@@ -22,12 +22,12 @@ void menu() {
 	printf("\t\t\t\t\t\t|0. Thoat chuong trinh                                |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }
-void menuKhoSanPham(){
-	color(11);
+void menuInventory(){
+	setColor(11);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|            HE THONG QUAN LY KHO SAN PHAM            |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	color(8);
+	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|1. Load danh sach kho san pham                       |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. Them san pham                                     |\t\t\t\t\t\n");
@@ -37,12 +37,12 @@ void menuKhoSanPham(){
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }
-void menuKhachHang() {
-	color(11);
+void menuCustomer() {
+	setColor(11);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|            HE THONG QUAN LY KHACH HANG              |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	color(8);
+	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|1. Load danh sach khach hang                         |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. Dang ky them thanh vien moi                       |\t\t\t\t\t\n");
@@ -51,12 +51,12 @@ void menuKhachHang() {
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }
-void menuDonHang() {
-	color(11);
+void menuOrder() {
+	setColor(11);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|            HE THONG QUAN LY DON HANG                |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	color(8);
+	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|1. Tao danh sach don hang                            |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. Xu ly don hang                                    |\t\t\t\t\t\n");
@@ -64,12 +64,12 @@ void menuDonHang() {
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }
-void menuSapXep_TimKiem() {
-	color(11);
+void menuSearchSort() {
+	setColor(11);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|        HE THONG QUAN LY TIM KIEM - SAP XEP          |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	color(8);
+	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|1. Tim kiem ma don                                   |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. Tim kiem ten khach hang                           |\t\t\t\t\t\n");
@@ -78,12 +78,12 @@ void menuSapXep_TimKiem() {
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }
-void menuThongKe() {
-	color(11);
+void menuStatistics() {
+	setColor(11);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|              HE THONG QUAN LY THONG KE              |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	color(8);
+	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|1. Tong doanh thu                                    |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. So don da xu ly                                   |\t\t\t\t\t\n");
@@ -93,8 +93,8 @@ void menuThongKe() {
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }
 
-void color(int color) {// Set color giao diện
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+void setColor(int color_code) {
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color_code);
 }
 
 void pause() {

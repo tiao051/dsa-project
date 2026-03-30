@@ -1,93 +1,100 @@
 ﻿#include "../include/order_manager.h"
 
-SNodeDonHang* CreateDonHang(DonHang x) {
-	SNodeDonHang* q = new SNodeDonHang();
-	if (q == NULL) return NULL;
-	q->Info = x;
-	q->Next = NULL;
-	return q;
+// Define missing defines for priority levels
+#define PRIORITY_EXPRESS PRIORITY_EXPRESS
+#define PRIORITY_VIP PRIORITY_VIP
+
+OrderNode* createOrderNode(Order x) {
+	OrderNode* node = new OrderNode();
+	if (node == NULL) return NULL;
+	node->info = x;
+	node->next = NULL;
+	return node;
 }
 
-int IsEmptyDH(ListDonHang& ldh) {
-	return ldh.Head == NULL ? 1 : 0;
+int isOrderQueueEmpty(OrderQueue* q) {
+	return q->head == NULL ? 1 : 0;
 }
 
-void InitQueueDH(ListDonHang& ldh) {
-	ldh.Head = ldh.Tail = NULL;
+void initOrderQueue(OrderQueue* q) {
+	q->head = q->tail = NULL;
 }
 
 
-//ENQUEUE
-int EnqueueDonHang(ListDonHang& ldh, DonHang dh) {
-	SNodeDonHang* q = CreateDonHang(dh);
+// Core Operations - Order Queue
+int enqueueOrder(OrderQueue* q, Order order) {
+	OrderNode* node = createOrderNode(order);
 
-	if (IsEmptyDH(ldh) == 1) {
-		ldh.Head = ldh.Tail = q;
+	if (isOrderQueueEmpty(q) == 1) {
+		q->head = q->tail = node;
 		return 1;
 	}
 	else {
-		// HỎA TỐC
-		if (dh.UuTien == DH_HOATOC) {
-			SNodeDonHang* Cur = ldh.Head;
-			SNodeDonHang* Prev = NULL;
-			while (Cur != NULL && Cur->Info.UuTien == dh.UuTien)
+		// EXPRESS/HOATOC priority
+		if (order.priority == PRIORITY_EXPRESS) {
+			OrderNode* cur = q->head;
+			OrderNode* prev = NULL;
+			while (cur != NULL && cur->info.priority == order.priority)
 			{
-				Prev = Cur;
-				Cur = Cur->Next;
+				prev = cur;
+				cur = cur->next;
 			}
-			if (Prev == NULL) {
-				q->Next = ldh.Head;
-				ldh.Head = q;
+			if (prev == NULL) {
+				node->next = q->head;
+				q->head = node;
 			}
 			else {
-				Prev->Next = q;
-				q->Next = Cur;
+				prev->next = node;
+				node->next = cur;
 			}
 			return 1;
 		}
-		// VIP
-		else if (dh.UuTien == DH_VIP) {
-			SNodeDonHang* Cur = ldh.Head;
-			SNodeDonHang* Prev = NULL;
-			while (Cur != NULL && Cur->Info.UuTien < dh.UuTien) {
-				Prev = Cur;
-				Cur = Cur->Next;
+		// VIP priority
+		else if (order.priority == PRIORITY_VIP) {
+			OrderNode* cur = q->head;
+			OrderNode* prev = NULL;
+			while (cur != NULL && cur->info.priority < order.priority) {
+				prev = cur;
+				cur = cur->next;
 			}
-			Prev->Next = q;
-			q->Next = Cur;
-			if (Prev == NULL) ldh.Tail = q;
+			prev->next = node;
+			node->next = cur;
+			if (prev == NULL) q->tail = node;
 			return 1;
 		}
-		// THƯỜNG
+		// NORMAL priority
 		else {
-			ldh.Tail->Next = q;
-			ldh.Tail = q;
+			q->tail->next = node;
+			q->tail = node;
 			return 1;
 		}
 	}
 
 }
 
-//DEQUEUE
-
-int DequeueXuLyDonHang(ListDonHang& ldh) {
-	if (IsEmptyDH(ldh) == 1) {
-		printf("\n\t\t\t\t\t\tQUEUE DANG RONG !!!");
-		return 1;
+// Dequeue - Process Order
+int dequeueOrder(OrderQueue* q, Order* out_order) {
+	if (isOrderQueueEmpty(q) == 1) {
+		printf("\n\t\t\t\t\t\tQUEUE IS EMPTY !!!");
+		return 0;
 	}
 
-	SNodeDonHang* temp = ldh.Head;
-	printf("\n\t\t\t\t\t\tDA XU LY DON: %d - %s", temp->Info.MaDonHang, temp->Info.TenKH);
-	//CẬP NHẬT TRỪ TỒN KHO
-	for (int i = 0; i < nSP; i++)
+	OrderNode* temp = q->head;
+	if (out_order != NULL) {
+		*out_order = temp->info;
+	}
+	printf("\n\t\t\t\t\t\tPROCESS ORDER: %d - %s", temp->info.id, temp->info.customer_name);
+	
+	// UPDATE INVENTORY - Decrease stock, increase sold quantity
+	for (int i = 0; i < product_count; i++)
 	{
-		if (strcmp(kho[i].TenSP, temp->Info.TenSP) == 0) {
-			kho[i].SoLuongTonTai -= temp->Info.SoLuong;
-			kho[i].SoLuongDaBan += temp->Info.SoLuong;
+		if (strcmp(inventory[i].name, temp->info.product_name) == 0) {
+			inventory[i].stock_quantity -= temp->info.quantity;
+			inventory[i].sold_quantity += temp->info.quantity;
 		}
 	}
-	ldh.Head = ldh.Head->Next;
-	if (ldh.Head == NULL) ldh.Tail = NULL;
+	q->head = q->head->next;
+	if (q->head == NULL) q->tail = NULL;
 	delete(temp);
 	return 1;
 }

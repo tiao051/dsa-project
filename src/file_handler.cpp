@@ -1,58 +1,57 @@
 ﻿#include "../include/order_manager.h"
 
-//LOAD 1 FILE SA PA
-void Load1File_SanPham(KhoHangSanPham kho[MAXSIZE], FILE* fi) {
+// Load a single product record from file
+void loadProductRecord(Product inventory[], FILE* file_ptr) {
 	int i = 0;
-	while (i < nSP) {
-		fscanf(fi, "%d,%[^,],%d,%lld,%d\n",
-			&kho[i].MaSP,
-			kho[i].TenSP,
-			&kho[i].SoLuongTonTai,
-			&kho[i].DonGia,
-			&kho[i].SoLuongDaBan);
+	while (i < product_count) {
+		fscanf(file_ptr, "%d,%[^,],%d,%lld,%d\n",
+			&inventory[i].id,
+			inventory[i].name,
+			&inventory[i].stock_quantity,
+			&inventory[i].price,
+			&inventory[i].sold_quantity);
 		i++;
 	}
 }
-//LOAD FILE SAN PHAM
-void LoadFile_SanPham(KeyType TenFILE, KhoHangSanPham kho[MAXSIZE], int& nSP) {
-	FILE* fi = fopen(TenFILE, "rt");
-	if (fi == NULL) {
-		printf("\nLOI DOC FILE %s VUI LONG KIEM TRA LAI", TenFILE);
+// Load entire inventory file
+void loadInventoryFile(const char* filename, Product inventory[], int* count) {
+	FILE* file_ptr = fopen(filename, "rt");
+	if (file_ptr == NULL) {
+		printf("\nERROR: Cannot read file %s. Please check file path.", filename);
 		return;
 	}
-	fscanf(fi, "%d\n", &nSP);
-	Load1File_SanPham(kho, fi);
-	fclose(fi);
+	fscanf(file_ptr, "%d\n", count);
+	loadProductRecord(inventory, file_ptr);
+	fclose(file_ptr);
 }
-//LOAD 1 FILE KHACH HANG
-void Load1File_KhachHang(FILE* fi, KhachHang& kh) {
-
-	fscanf(fi, "%d,%[^,],%[^,],%d,%[^,],%lld\n",
-		&kh.MaKH,
-		kh.TenKH,
-		kh.SoDienThoai,
-		&kh.UuTienKH,
-		kh.TrangThai,
-		&kh.TongTien);
-
+// Load a single customer record from file
+void loadCustomerRecord(FILE* file_ptr, Customer* customer_ptr) {
+	fscanf(file_ptr, "%d,%[^,],%[^,],%d,%[^,],%lld\n",
+		&customer_ptr->id,
+		customer_ptr->name,
+		customer_ptr->phone,
+		(int*)&customer_ptr->tier,
+		customer_ptr->status,
+		&customer_ptr->total_spent);
 }
-//LOAD FILE KHACH HANG
-void LoadFile_KhachHang(KeyType TenFILE, ListKhachHang& lkh, int& n) {
-	FILE* fi = fopen(TenFILE, "rt");
-	if (fi == NULL) {
-		printf("\n\t\t\t\t\t\tLOI DOC FILE %s VUI LONG KIEM TRA LAI", TenFILE);
+// Load entire customer file
+void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
+	FILE* file_ptr = fopen(filename, "rt");
+	if (file_ptr == NULL) {
+		printf("\n\t\t\t\t\t\tERROR: Cannot read file %s. Please check file path.", filename);
 		return;
 	}
 
-	fscanf(fi, "%d\n", &n);
+	fscanf(file_ptr, "%d\n", count);
 	int i = 0;
-	while (i < n) {
-		KhachHang kh;
-		Load1File_KhachHang(fi, kh); 
-		SNodeKhachHang* p = CreateKhachHang(kh);
-		InsertTaiL_KhachHang(lkh, p->Info);
+	while (i < *count) {
+		Customer customer;
+		loadCustomerRecord(file_ptr, &customer);
+		initOrderQueue(&customer.history);
+		customer.total_spent = 0;
+		insertCustomerTail(list, customer);
 		i++;
 	}
 
-	fclose(fi);
+	fclose(file_ptr);
 }

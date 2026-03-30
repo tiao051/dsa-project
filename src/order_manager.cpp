@@ -1,80 +1,74 @@
 ﻿#include "../include/order_manager.h"
 
-//NHẬP THÀNH PHẦN ĐƠN HÀNG
-void InsertTail_DonHang(ListDonHang& ldh) {
-	DonHang dh;
+// Create and input a new order with stock validation
+void insertOrderManual(OrderQueue* q) {
+	Order order;
 	printf("\n\t\t\t\t\t\tNhap Ma Don: ");
-	scanf("%d", &dh.MaDonHang);
+	scanf("%d", &order.id);
 	getchar();
 	
 	printf("\n\t\t\t\t\t\tNhap Ten Khach Hang: ");
-	fgets(dh.TenKH, sizeof(dh.TenKH), stdin);
-	dh.TenKH[strlen(dh.TenKH) - 1] = '\0';
+	fgets(order.customer_name, sizeof(order.customer_name), stdin);
+	order.customer_name[strlen(order.customer_name) - 1] = '\0';
 
 	printf("\n\t\t\t\t\t\tNhap Ten San Pham: ");
-	fgets(dh.TenSP, sizeof(dh.TenSP), stdin);
-	dh.TenSP[strlen(dh.TenSP) - 1] = '\0';
+	fgets(order.product_name, sizeof(order.product_name), stdin);
+	order.product_name[strlen(order.product_name) - 1] = '\0';
 
-	//KIỂM SỐ LƯỢNG TỒN KHO	
+	// KIEM TRA SO LUONG TON KHO
 	printf("\n\t\t\t\t\t\tNhap So Luong San Pham: ");
-	scanf("%d", &dh.SoLuong);
-	for (int i = 0; i < nSP; i++)
+	scanf("%d", &order.quantity);
+	for (int i = 0; i < product_count; i++)
 	{
-		if (strcmp(kho[i].TenSP, dh.TenSP) == 0) {
-			if (kho[i].SoLuongTonTai < dh.SoLuong) {
-				printf("\n\t\t\t\t\t\tTU CHOI: KHO CON %d SAN PHAM, VUI LONG MUA IT NHAT HOAC CHON SAN PHAM KHAC", kho[i].SoLuongTonTai);
+		if (strcmp(inventory[i].name, order.product_name) == 0) {
+			if (inventory[i].stock_quantity < order.quantity) {
+				printf("\n\t\t\t\t\t\tTU CHOI: KHO CON %d SAN PHAM, VUI LONG MUA IT NHAT HOAC CHON SAN PHAM KHAC", inventory[i].stock_quantity);
 				return;
 			}
-			dh.DonGia = kho[i].DonGia;
+			order.price = inventory[i].price;
 		}
 
 	}
-	printf("\n\t\t\t\t\t\tHAY LUA CHON CAC UU TIEN SAU: 1: HOA TOC, 2: VIP, 3: THUONG: ");
-	scanf("%d", &dh.UuTien);
+	printf("\n\t\t\t\t\t\tHAY LUA CHON CAC UU TIEN SAU: 2: HOA TOC, 1: VIP, 0: THUONG: ");
+	int priority_choice;
+	scanf("%d", &priority_choice);
 	getchar();
+	if (priority_choice >= 0 && priority_choice <= 2) {
+		order.priority = (PriorityLevel)priority_choice;
+	} else {
+		order.priority = PRIORITY_NORMAL;
+	}
 
 	printf("\n\t\t\t\t\t\tNhap Don Gia: ");
-	scanf("%lld", &dh.DonGia);
+	scanf("%lld", &order.price);
 	getchar();
 
-	if (EnqueueDonHang(ldh, dh)) {
+	if (enqueueOrder(q, order)) {
 		printf("\n\t\t\t\t\t\t-> THEM DON HANG THANH CONG!!!!\n");
 	}
 
 }
 
-//TẠO DANH SÁCH ĐƠN HÀNG
-void InputYourHand_InsertTailDonHang(ListDonHang& ldh) {
-	int n;
-	printf("\n\t\t\t\t\t\tNhap So Luong Don Hang: ");
-	scanf("%d", &n);
-	for (int i = 0; i < n; i++)
-	{
-		printf("\n\t\t\t\t\t\tTHU TU THU %d\n", i + 1);
-		InsertTail_DonHang(ldh);
-	}
+// Print single order
+void printSingleOrder(Order order) {
+	printf("\t\t| Order%-10d | %-25s | %-25s | %-12d | %-10d | %8lld |\n",
+		order.id,
+		order.customer_name,
+		order.product_name,
+		order.quantity,
+		order.priority,
+		order.price);
 }
 
-//IN 1 ĐƠN HÀNG
-void in1DonHang(DonHang dh) {
-	printf("\t\t| DH%-14d | %-25s | %-25s | %-12d | %-10d | %8lld |\n",
-		dh.MaDonHang,
-		dh.TenKH,
-		dh.TenSP,
-		dh.SoLuong,
-		dh.UuTien,
-		dh.DonGia);
-}
-
-//XUẤT DANH SÁCH ĐƠN HÀNG
-void XuatDonHang(ListDonHang& ldh) {
-	printf("\t\t------------------------------------------------DANH SACH DON HANG-------------------------------------------------\n");
-	TieuDeDonHang();
-	SNodeDonHang* q = ldh.Head;
-	while(q != NULL)
+// Display all orders in queue
+void displayOrderQueue(OrderQueue* q) {
+	printf("\t\t------------------------------------------------ORDER LIST-------------------------------------------------\n");
+	printOrderHeader();
+	OrderNode* node = q->head;
+	while(node != NULL)
 	{
-		in1DonHang(q->Info);
-		q = q->Next;
+		printSingleOrder(node->info);
+		node = node->next;
 	}
 	printf("\t\t-------------------------------------------------------------------------------------------------------------------\n");
 }

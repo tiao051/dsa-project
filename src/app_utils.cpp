@@ -1,125 +1,122 @@
 #include "../include/order_manager.h"
 
-int madon;
+int search_order_id;
 const char* INVENTORY_FILE = "data/inventory.txt";
 const char* CUSTOMER_FILE = "data/customers.txt";
 
-// ================= KHO =================
-void processKhoHang(Product inventory[MAXSIZE], int& nSP) {
-	int c;
-	nSP = 0;
+// ================= INVENTORY MANAGEMENT =================
+void processInventory(Product inventory[MAXSIZE], int* product_count) {
+	int choice;
+	*product_count = 0;
 	do {
 		system("cls");
-		menuKhoSanPham();
-		color(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &c);
-
-		switch (c) {
+		menuInventory();
+	setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
 		case 1:
-			color(7);
-			loadInventoryFile(INVENTORY_FILE, inventory, nSP);
-			displayInventory(inventory, nSP);
+			setColor(7);
+			loadInventoryFile(INVENTORY_FILE, inventory, product_count);
+			displayInventory(inventory, *product_count);
 			pause();
 			break;
 		case 2:
-			color(7);
-			createInventory(inventory, nSP);
+			setColor(7);
+			importStock(inventory, product_count);
 			pause();
 			break;
 		case 3:
-			color(7);
-			displayInventory(inventory, nSP);
-			pause();
+			// TODO: Implementation for import stock
 			break;
 		case 4:
-			color(7);
-			updateInventory(inventory, nSP);
+			setColor(7);
+			updateInventory(inventory, product_count);
 			pause();
 			break;
 		case 5:
-			color(7);
-			displayInventory(inventory, nSP);
+			setColor(7);
+			displayInventory(inventory, *product_count);
 			pause();
 			break;
 
 		case 0:
-			color(10);
+			setColor(10);
 			system("cls");
-			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+		printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
 			break;
 		default:
-			color(4);
+			setColor(4);
 			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+		printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
 			break;
 		}
 
-	} while (c != 0);
+	} while (choice != 0);
 }
 
-// ================= DON HANG =================
-void processDonHang(ListDonHang& ldh) {
-	int c;
+// ================= ORDER MANAGEMENT =================
+void processOrder(OrderQueue* q) {
+	int choice;
+	Order out_order;
 	do {
 		system("cls");
-		menuDonHang();
-		color(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &c);
+		menuOrder();
+		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
 
-		switch (c) {
+		switch (choice) {
 		case 1:
-			color(7);
-			InputYourHand_InsertTailDonHang(ldh);
+			setColor(7);
+			insertOrderManual(q);
 			pause();
 			break;
 
 		case 2:
-			color(7);
-			DequeueXuLyDonHang(ldh);
+			setColor(7);
+			dequeueOrder(q, &out_order);
 			pause();
 			break;
 
 		case 3:
-			color(7);
-			XuatDonHang(ldh);
+			setColor(7);
+			displayOrderQueue(q);
 			pause();
 			break;
 
 		case 0:
-			color(10);
+			setColor(10);
 			system("cls");
-			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+			printf("\n\t\t\t\t\t\tRETURN TO MAIN SCREEN\n");
 			break;
 		default:
-			color(4);
+			setColor(4);
 			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+			printf("\n\t\t\t\t\tYOU EXCEEDED FUNCTION OPTIONS, PLEASE SELECT VALID OPTION\n");
 			break;
 		}
 
-	} while (c != 0);
+	} while (choice != 0);
 }
 
-// ============ TIM KIEM - SAP XEP=================
-void processTimKiemSapXep(ListDonHang& ldh, ListKhachHang& lkh) {
-	DonHang dh;
-	KhachHang kh;
-	int c;
+// ============ SEARCH & SORT =================
+void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
+	Order order;
+	Customer customer;
+	int choice;
 
 	do {
 		system("cls");
-		menuSapXep_TimKiem();
-		color(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &c);
+		menuSearchSort();
+		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
 
-		switch (c) {
+		switch (choice) {
 		case 1:
-			color(7);
+			setColor(7);
 			printf("\n\t\t\t\t\t\tNHAP MA DON: ");
-			scanf("%d", &madon);
+			scanf("%d", &search_order_id);
 			getchar();
 
-			if (TimKiem_MaDon(ldh, madon, dh) != NULL) {
+			if (findOrderById(order_queue, search_order_id) != NULL) {
 				printf("\n\t\t\t\t\t\tTIM THANH CONG!\n");
-				TieuDeDonHang();
-				in1DonHang(dh);
+				printOrderHeader();
+				printSingleOrder(order);
 			}
 			else {
 				printf("\n\t\t\t\t\t\tKHONG TIM THAY!\n");
@@ -127,16 +124,16 @@ void processTimKiemSapXep(ListDonHang& ldh, ListKhachHang& lkh) {
 			pause();
 			break;
 		case 2:
-			color(7);
+			setColor(7);
 			printf("\n\t\t\t\t\t\tNHAP TEN KHACH HANG: ");
 			getchar();
-			fgets(kh.TenKH, sizeof(kh.TenKH), stdin);
-			kh.TenKH[strlen(kh.TenKH) - 1] = '\0';
+			fgets(customer.name, sizeof(customer.name), stdin);
+			customer.name[strlen(customer.name) - 1] = '\0';
 
-			if (TimKiem_TenKhachHang(lkh, kh.TenKH, kh) != NULL) {
+			if (findCustomerByName(customer_list, customer.name) != NULL) {
 				printf("\n\t\t\t\t\t\tTIM THANH CONG!\n");
-				TieuDeKhachHang();
-				in1KhachHang(kh);
+				printCustomerHeader();
+				printSingleCustomer(customer);
 			}
 			else {
 				printf("\n\t\t\t\t\t\tKHONG TIM THAY!\n");
@@ -144,97 +141,97 @@ void processTimKiemSapXep(ListDonHang& ldh, ListKhachHang& lkh) {
 			pause();
 			break;
 		case 3:
-			color(7);
-			SapXepSoluong_SanPham_GiamDan(inventory, nSP);
-			XuatKhoHangSanPham(inventory, nSP);
+			setColor(7);
+			sortProductsBySalesDesc(inventory, product_count);
+			displayInventory(inventory, product_count);
 			pause();
 			break;
 		case 4:
-			color(7);
-			SapXepTongTien_KhachHang_GiamDan(lkh);
-			XuatKhachHang(lkh);
+			setColor(7);
+			sortCustomersBySpentDesc(customer_list);
+			displayCustomerList(customer_list);
 			pause();
 			break;
 		case 0:
-			color(10);
+			setColor(10);
 			system("cls");
-			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+			printf("\n\t\t\t\t\t\tRETURN TO MAIN SCREEN\n");
 			break;
 		default:
-			color(4);
+			setColor(4);
 			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+			printf("\n\t\t\t\t\tYOU EXCEEDED FUNCTION OPTIONS, PLEASE SELECT VALID OPTION\n");
 			break;
 		}
 
-	} while (c != 0);
+	} while (choice != 0);
 }
 
-void processKhachHang(ListKhachHang& lkh) {
-	int c,n;
+void processCustomer(CustomerList* customer_list) {
+	int choice, count;
 	do {
 		system("cls");
-		menuKhachHang();
-		color(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &c);
-		switch (c) {
+		menuCustomer();
+		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
+		switch (choice) {
 		case 1:
-			color(7);
-			LoadFile_KhachHang(CUSTOMER_FILE, lkh, n);
-			XuatKhachHang(lkh);
+			setColor(7);
+			loadCustomerFile(CUSTOMER_FILE, customer_list, &count);
+			displayCustomerList(customer_list);
 			pause();
 			break;
 		case 2:
-			color(7);
-			DangKy_ThanhVienMoi(lkh);
+			setColor(7);
+			registerNewCustomer(customer_list);
 			pause();
 			break;
 		case 3:
-			color(7);
-			NangHang_ThanhVienTuDong(lkh);
+			setColor(7);
+			autoUpgradeCustomerTier(customer_list);
 			pause();
 			break;
 		case 4:
-			color(7);
-			XuatKhachHang(lkh);
+			setColor(7);
+			displayCustomerList(customer_list);
 			pause();
 			break;
 		case 0:
-			color(10);
+			setColor(10);
 			system("cls");
 			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
 			break;
 		default:
-			color(4);
+			setColor(4);
 			system("cls");
 			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
 			break;
 		}
-	} while (c != 0);
+	} while (choice != 0);
 	system("cls");
 }
 
-void processThongKe() {
-	int c;
+void processStatistics() {
+	int choice;
 	do {
 		system("cls");
-		menuThongKe();
-		color(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &c);
-		switch (c) {
+		menuStatistics();
+		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); scanf("%d", &choice);
+		switch (choice) {
 		case 1:break;
 		case 2:break;
 		case 3:break;
 		case 4:break;
 		case 0:
-			color(10);
+			setColor(10);
 			system("cls");
-			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+			printf("\n\t\t\t\t\t\tRETURN TO MAIN SCREEN\n");
 			break;
 		default:
-			color(4);
+			setColor(4);
 			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+			printf("\n\t\t\t\t\tYOU EXCEEDED FUNCTION OPTIONS, PLEASE SELECT VALID OPTION\n");
 			break;
 		}
-	} while (c != 0);
+	} while (choice != 0);
 	system("cls");
 }
