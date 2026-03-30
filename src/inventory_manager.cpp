@@ -6,26 +6,54 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 		printf("\n\t\t\t\t\t\tKHO DA DAY, KHONG THE THEM!");
 		return;
 	}
-	printf("\n\t\t\t\t\t\tNhap ma kho hang san pham: ");
-	scanf("%d", &inventory[*nSP].id);
-	getchar();
 
-	printf("\n\t\t\t\t\t\tNhap ten san pham: ");
-	fgets(inventory[*nSP].name, sizeof(inventory[*nSP].name), stdin);
-	inventory[*nSP].name[strlen(inventory[*nSP].name) - 1] = '\0';
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF);
 
-	printf("\n\t\t\t\t\t\tNhap so luong ton tai: ");
-	scanf("%d", &inventory[*nSP].stock_quantity);
-	getchar();
-	
-	printf("\n\t\t\t\t\t\tNhap don gia: ");
-	scanf("%lld", &inventory[*nSP].price);
-	getchar();
+	// Auto-generate product ID
+	inventory[*nSP].id = 101 + *nSP;
+
+	// Validate product name
+	do {
+		printf("\n\t\t\t\t\t\tNhap ten san pham: ");
+		fgets(inventory[*nSP].name, sizeof(inventory[*nSP].name), stdin);
+		inventory[*nSP].name[strcspn(inventory[*nSP].name, "\n")] = '\0';
+
+		if (strlen(inventory[*nSP].name) == 0) {
+			setColor(4); printf("\t\t\t\t\t\t[!] Ten san pham khong duoc de trong!\n"); setColor(7);
+		}
+	} while (strlen(inventory[*nSP].name) == 0);
+
+	// Validate stock quantity
+	do {
+		printf("\n\t\t\t\t\t\tNhap so luong ton tai: ");
+		scanf("%d", &inventory[*nSP].stock_quantity);
+		getchar();
+
+		if (inventory[*nSP].stock_quantity <= 0) {
+			setColor(4); printf("\t\t\t\t\t\t[!] So luong phai lon hon 0!\n"); setColor(7);
+		}
+	} while (inventory[*nSP].stock_quantity <= 0);
+
+	// Validate price
+	do {
+		printf("\n\t\t\t\t\t\tNhap don gia: ");
+		scanf("%lld", &inventory[*nSP].price);
+		getchar();
+
+		if (inventory[*nSP].price <= 0) {
+			setColor(4); printf("\t\t\t\t\t\t[!] Don gia phai lon hon 0!\n"); setColor(7);
+		}
+	} while (inventory[*nSP].price <= 0);
 
 	inventory[*nSP].sold_quantity = 0;
-	nSP++;
+	(*nSP)++;
 
 	printf("\n\t\t\t\t\t\t->THEM KHO HANG THANH CONG");
+	printf("\n\t\t\t\t\t\tMa san pham: %d", inventory[*nSP - 1].id);
+	printf("\n\t\t\t\t\t\tTen san pham: %s", inventory[*nSP - 1].name);
+	printf("\n\t\t\t\t\t\tSo luong: %d", inventory[*nSP - 1].stock_quantity);
+	printf("\n\t\t\t\t\t\tDon gia: %lld", inventory[*nSP - 1].price);
 
 }
 
