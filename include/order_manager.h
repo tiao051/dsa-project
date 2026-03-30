@@ -96,6 +96,8 @@ void loadInventoryFile(const char* filename, Product inv[], int* count);
 void loadCustomerFile(const char* filename, CustomerList* list, int* count);
 
 // Core Logic
+void createInventory(Product inventory[MAXSIZE], int* count);
+void updateInventory(Product inventory[MAXSIZE], int* count);
 int enqueueOrder(OrderQueue* q, Order x);
 int dequeueOrder(OrderQueue* q, Order* out_order);
 void insertCustomerTail(CustomerList* l, Customer x);
@@ -115,7 +117,6 @@ void displayCustomerList(CustomerList* l);
 
 // Utilities
 void setColor(int color_code);
-void clearScreen();
 void pause();
 
 #endif

@@ -1,11 +1,11 @@
 #include "../include/order_manager.h"
 
 int madon;
-KeyType DocFILE_KhoHangSanPham = "DocFile_DanhSachKhoHangSanPham.txt";
-KeyType DocFILE_KhachHang = "DocFile_DanhSachKhachHang.txt";
+const char* INVENTORY_FILE = "data/inventory.txt";
+const char* CUSTOMER_FILE = "data/customers.txt";
 
 // ================= KHO =================
-void processKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP) {
+void processKhoHang(Product inventory[MAXSIZE], int& nSP) {
 	int c;
 	nSP = 0;
 	do {
@@ -16,28 +16,28 @@ void processKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP) {
 		switch (c) {
 		case 1:
 			color(7);
-			LoadFile_SanPham(DocFILE_KhoHangSanPham, kho, nSP);
-			XuatKhoHangSanPham(kho, nSP);
+			loadInventoryFile(INVENTORY_FILE, inventory, nSP);
+			displayInventory(inventory, nSP);
 			pause();
 			break;
 		case 2:
 			color(7);
-			CreateKhoHang(kho, nSP);
+			createInventory(inventory, nSP);
 			pause();
 			break;
 		case 3:
 			color(7);
-			NhapKhoHang(kho, nSP);
+			displayInventory(inventory, nSP);
 			pause();
 			break;
 		case 4:
 			color(7);
-			CapNhatKho(kho, nSP);
+			updateInventory(inventory, nSP);
 			pause();
 			break;
 		case 5:
 			color(7);
-			XuatKhoHangSanPham(kho, nSP);
+			displayInventory(inventory, nSP);
 			pause();
 			break;
 
@@ -145,8 +145,8 @@ void processTimKiemSapXep(ListDonHang& ldh, ListKhachHang& lkh) {
 			break;
 		case 3:
 			color(7);
-			SapXepSoluong_SanPham_GiamDan(kho, nSP);
-			XuatKhoHangSanPham(kho, nSP);
+			SapXepSoluong_SanPham_GiamDan(inventory, nSP);
+			XuatKhoHangSanPham(inventory, nSP);
 			pause();
 			break;
 		case 4:
@@ -179,7 +179,7 @@ void processKhachHang(ListKhachHang& lkh) {
 		switch (c) {
 		case 1:
 			color(7);
-			LoadFile_KhachHang(DocFILE_KhachHang, lkh, n);
+			LoadFile_KhachHang(CUSTOMER_FILE, lkh, n);
 			XuatKhachHang(lkh);
 			pause();
 			break;

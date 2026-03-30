@@ -2,36 +2,36 @@
 
 KhoHangSanPham kho[MAXSIZE];
 int nSP = 0;
-void CreateKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP) {
+void createInventory(Product inventory[MAXSIZE], int& nSP) {
 	printf("\n\t\t\t\t\t\tNhap ma kho hang san pham: ");
-	scanf("%d", &kho[nSP].MaSP);
+	scanf("%d", &inventory[nSP].id);
 	getchar();
 
 	printf("\n\t\t\t\t\t\tNhap ten san pham: ");
-	fgets(kho[nSP].TenSP, sizeof(kho[nSP].TenSP), stdin);
-	kho[nSP].TenSP[strlen(kho[nSP].TenSP) - 1] = '\0';
+	fgets(inventory[nSP].name, sizeof(inventory[nSP].name), stdin);
+	inventory[nSP].name[strlen(inventory[nSP].name) - 1] = '\0';
 
 	printf("\n\t\t\t\t\t\tNhap so luong ton tai: ");
-	scanf("%d", &kho[nSP].SoLuongTonTai);
+	scanf("%d", &inventory[nSP].stock_quantity);
 	getchar();
 	
 	printf("\n\t\t\t\t\t\tNhap don gia: ");
-	scanf("%lld", &kho[nSP].DonGia);
+	scanf("%lld", &inventory[nSP].price);
 	getchar();
 
-	kho[nSP].SoLuongDaBan = 0;
+	inventory[nSP].sold_quantity = 0;
 	nSP++;
 
 	printf("\n\t\t\t\t\t\t->THEM KHO HANG THANH CONG");
 
 }
-void NhapKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP) {
+void displayInventory(Product inventory[MAXSIZE], int& nSP) {
 	int masp, soluong;
 
 	printf("\n\t\t\t\t\t\tNhap ma san pham: ");
 	scanf("%d", &masp);
 
-	int find = TimKiem_MaSP(kho, nSP, masp);
+	int find = findProductById(inventory, nSP, masp);
 	if (find == -1) {
 		printf("\n\t\t\t\t\t\tKHONG TIM THAY MASP");
 		return;
@@ -46,25 +46,25 @@ void NhapKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP) {
 			return;
 		}
 		else {
-			kho[find].SoLuongTonTai += soluong;
-			printf("\n\t\t\t\t\t\tDa cap nhat so luong. Tong cong: %d", kho[find].SoLuongTonTai);
+			inventory[find].stock_quantity += soluong;
+			printf("\n\t\t\t\t\t\tDa cap nhat so luong. Tong cong: %d", inventory[find].stock_quantity);
 		}
 	}
 }
-void CapNhatKho(KhoHangSanPham kho[MAXSIZE], int& nSP) {
+void updateInventory(Product inventory[MAXSIZE], int* count) {
 	int masp;
-	ItemLongType GiaMoi;
+	AmountType GiaMoi;
 
 	printf("\n\t\t\t\t\t\tNhap ma san pham: ");
 	scanf("%d", &masp);
 
-	int find = TimKiem_MaSP(kho, nSP, masp);
+	int find = findProductById(inventory, *count, masp);
 	if (find == -1) {
 		printf("\n\t\t\t\t\t\tKHONG TIM THAY MASP");
 		return;
 	}
 	else {
-		printf("\n\t\t\t\t\t\tGIA CU: %d", kho[find].DonGia);
+		printf("\n\t\t\t\t\t\tGIA CU: %lld", inventory[find].price);
 
 		printf("\n\t\t\t\t\t\tNHAP GIA MOI: ");
 		scanf("%lld", &GiaMoi);
@@ -75,22 +75,22 @@ void CapNhatKho(KhoHangSanPham kho[MAXSIZE], int& nSP) {
 			return;
 		}
 		else {
-			kho[find].DonGia = GiaMoi;
-			printf("\n\t\t\t\t\t\tDa cap nhat gia thanh: %lld", kho[find].DonGia);
+			inventory[find].price = GiaMoi;
+			printf("\n\t\t\t\t\t\tDa cap nhat gia thanh: %lld", inventory[find].price);
 		}
 	}
 }
-void XuatKhoHangSanPham(KhoHangSanPham kho[MAXSIZE], int& nSP) {
+void displayInventory(Product inventory[MAXSIZE], int& nSP) {
 	printf("\n\t\t\t\t------------------------------------DANH SACH KHO HANG---------------------------------\n");
 	TieuDeKhoHang();
 	for (int i = 0; i < nSP; i++)
 	{
 		printf("\t\t\t\t| SP%-14d | %-25s | %-12d | %-10lld | %8d |\n",
-			kho[i].MaSP,
-			kho[i].TenSP,
-			kho[i].SoLuongTonTai,
-			kho[i].DonGia,
-			kho[i].SoLuongDaBan);
+			inventory[i].id,
+			inventory[i].name,
+			inventory[i].stock_quantity,
+			inventory[i].price,
+			inventory[i].sold_quantity);
 	}
 	printf("\t\t\t\t---------------------------------------------------------------------------------------\n");
 }
