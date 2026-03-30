@@ -123,10 +123,11 @@ int findProductById(Product inv[], int count, int id);
 
 void swapProduct(Product* a, Product* b);
 void sortProductsBySalesDesc(Product inv[], int count);
-void swapCustomer(Customer* a, Customer* b);
+void swapCustomerInfo(Customer* a, Customer* b);
 void sortCustomersBySpentDesc(CustomerList* l);
 
 // Inventory Management
+void createInventory(Product inv[], int* count);
 void importStock(Product inv[], int* count);
 void updateInventory(Product inv[], int* count);
 void displayInventory(Product inv[], int count);

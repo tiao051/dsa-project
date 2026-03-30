@@ -1,23 +1,28 @@
 ﻿#include "../include/order_manager.h"
 
-void createInventory(Product inventory[MAXSIZE], int& nSP) {
+void createInventory(Product inventory[MAXSIZE], int* nSP) {
+
+	if (*nSP >= MAXSIZE) {
+		printf("\n\t\t\t\t\t\tKHO DA DAY, KHONG THE THEM!");
+		return;
+	}
 	printf("\n\t\t\t\t\t\tNhap ma kho hang san pham: ");
-	scanf("%d", &inventory[nSP].id);
+	scanf("%d", &inventory[*nSP].id);
 	getchar();
 
 	printf("\n\t\t\t\t\t\tNhap ten san pham: ");
-	fgets(inventory[nSP].name, sizeof(inventory[nSP].name), stdin);
-	inventory[nSP].name[strlen(inventory[nSP].name) - 1] = '\0';
+	fgets(inventory[*nSP].name, sizeof(inventory[*nSP].name), stdin);
+	inventory[*nSP].name[strlen(inventory[*nSP].name) - 1] = '\0';
 
 	printf("\n\t\t\t\t\t\tNhap so luong ton tai: ");
-	scanf("%d", &inventory[nSP].stock_quantity);
+	scanf("%d", &inventory[*nSP].stock_quantity);
 	getchar();
 	
 	printf("\n\t\t\t\t\t\tNhap don gia: ");
-	scanf("%lld", &inventory[nSP].price);
+	scanf("%lld", &inventory[*nSP].price);
 	getchar();
 
-	inventory[nSP].sold_quantity = 0;
+	inventory[*nSP].sold_quantity = 0;
 	nSP++;
 
 	printf("\n\t\t\t\t\t\t->THEM KHO HANG THANH CONG");

@@ -24,11 +24,13 @@ void processInventory(Product inventory[MAXSIZE], int* product_count) {
 				break;
 			case 2:
 				setColor(7);
-				importStock(inventory, product_count);
+				createInventory(inventory, product_count);
 				pause();
 				break;
 			case 3:
-				// TODO: Implementation for import stock
+				setColor(7);
+				importStock(inventory, product_count);
+				pause();
 				break;
 			case 4:
 				setColor(7);
