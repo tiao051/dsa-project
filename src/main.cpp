@@ -61,7 +61,7 @@ void startApp() {
 		default:
 			setColor(4); 
 			system("cls");
-			printf("\n\t\t\t\t\tYOU EXCEEDED FUNCTION OPTIONS, PLEASE SELECT VALID OPTION\n"); 
+			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n"); 
 			break;
 		}
 	} while (menu_choice != 0);

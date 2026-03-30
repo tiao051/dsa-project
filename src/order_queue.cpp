@@ -75,7 +75,7 @@ int enqueueOrder(OrderQueue* q, Order order) {
 // Dequeue - Process Order
 int dequeueOrder(OrderQueue* q, Order* out_order) {
 	if (isOrderQueueEmpty(q) == 1) {
-		printf("\n\t\t\t\t\t\tQUEUE IS EMPTY !!!");
+		printf("\n\t\t\t\t\t\tDANH SACH DON HANG RONG !!!");
 		return 0;
 	}
 
@@ -83,7 +83,7 @@ int dequeueOrder(OrderQueue* q, Order* out_order) {
 	if (out_order != NULL) {
 		*out_order = temp->info;
 	}
-	printf("\n\t\t\t\t\t\tPROCESS ORDER: %d - %s", temp->info.id, temp->info.customer_name);
+	printf("\n\t\t\t\t\t\tXU LY DON HANG: %d - %s", temp->info.id, temp->info.customer_name);
 	
 	// UPDATE INVENTORY - Decrease stock, increase sold quantity
 	for (int i = 0; i < product_count; i++)

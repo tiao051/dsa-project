@@ -1,4 +1,5 @@
 ﻿#include "../include/order_manager.h"
+
 void createInventory(Product inventory[MAXSIZE], int& nSP) {
 	printf("\n\t\t\t\t\t\tNhap ma kho hang san pham: ");
 	scanf("%d", &inventory[nSP].id);

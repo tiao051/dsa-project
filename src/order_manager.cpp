@@ -62,7 +62,7 @@ void printSingleOrder(Order order) {
 
 // Display all orders in queue
 void displayOrderQueue(OrderQueue* q) {
-	printf("\t\t------------------------------------------------ORDER LIST-------------------------------------------------\n");
+	printf("\t\t------------------------------------------------DANH SACH DON HANG-------------------------------------------------\n");
 	printOrderHeader();
 	OrderNode* node = q->head;
 	while(node != NULL)
