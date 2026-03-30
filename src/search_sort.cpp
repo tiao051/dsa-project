@@ -1,4 +1,5 @@
-﻿#include "QuanLy_DonHangThuongMaiDienTu.h"
+﻿#include "../include/order_manager.h"
+
 //TÌM KIẾM MÃ SẢN PHẨM
 int TimKiem_MaSP(KhoHangSanPham kho[MAXSIZE], int& nSP, int masp) {
 	for (int i = 0; i < nSP; i++)

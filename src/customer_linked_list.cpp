@@ -1,4 +1,4 @@
-#include "QuanLy_DonHangThuongMaiDienTu.h"
+#include "../include/order_manager.h"
 
 SNodeKhachHang* CreateKhachHang(KhachHang kh) {
 	SNodeKhachHang* p = new SNodeKhachHang();

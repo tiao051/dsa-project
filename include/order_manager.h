@@ -1,7 +1,7 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 
-#ifndef QuanLy_DonHangThuongMaiDienTu_h
-#define QuanLy_DonHangThuongMaiDienTu_h
+#ifndef order_manager_h
+#define order_manager_h
 
 #include <stdio.h>
 #include <conio.h>

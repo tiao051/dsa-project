@@ -1,4 +1,5 @@
-﻿#include "QuanLy_DonHangThuongMaiDienTu.h"
+﻿#include "../include/order_manager.h"
+
 //ĐĂNG KÝ THÀNH VIÊN MỚI
 void DangKy_ThanhVienMoi(ListKhachHang& lkh) {
 	KhachHang kh;

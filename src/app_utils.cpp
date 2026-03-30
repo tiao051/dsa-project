@@ -1,4 +1,4 @@
-#include "QuanLy_DonHangThuongMaiDienTu.h"
+#include "../include/order_manager.h"
 
 int madon;
 KeyType DocFILE_KhoHangSanPham = "DocFile_DanhSachKhoHangSanPham.txt";

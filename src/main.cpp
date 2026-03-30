@@ -1,4 +1,5 @@
-#include "QuanLy_DonHangThuongMaiDienTu.h" 
+#include "../include/order_manager.h"
+
 ListDonHang ldh;
 ListKhachHang lkh;
 int luachon;

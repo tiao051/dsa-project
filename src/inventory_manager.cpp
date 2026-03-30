@@ -1,4 +1,5 @@
-﻿#include "QuanLy_DonHangThuongMaiDienTu.h"
+﻿#include "../include/order_manager.h"
+
 KhoHangSanPham kho[MAXSIZE];
 int nSP = 0;
 void CreateKhoHang(KhoHangSanPham kho[MAXSIZE], int& nSP) {

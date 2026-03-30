@@ -1,4 +1,5 @@
-﻿#include "QuanLy_DonHangThuongMaiDienTu.h"
+﻿#include "../include/order_manager.h"
+
 //LOAD 1 FILE SA PA
 void Load1File_SanPham(KhoHangSanPham kho[MAXSIZE], FILE* fi) {
 	int i = 0;
