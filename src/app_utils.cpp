@@ -83,12 +83,12 @@ void processOrder(OrderQueue* q) {
 		case 0:
 			setColor(10);
 			system("cls");
-			printf("\n\t\t\t\t\t\tRETURN TO MAIN SCREEN\n");
+			printf("\n\t\t\t\t\t\tTRO VE MAN HINH CHINH\n");
 			break;
 		default:
 			setColor(4);
 			system("cls");
-			printf("\n\t\t\t\t\tYOU EXCEEDED FUNCTION OPTIONS, PLEASE SELECT VALID OPTION\n");
+			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
 			break;
 		}
 
@@ -155,12 +155,12 @@ void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 		case 0:
 			setColor(10);
 			system("cls");
-			printf("\n\t\t\t\t\t\tRETURN TO MAIN SCREEN\n");
+			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
 			break;
 		default:
 			setColor(4);
 			system("cls");
-			printf("\n\t\t\t\t\tYOU EXCEEDED FUNCTION OPTIONS, PLEASE SELECT VALID OPTION\n");
+			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
 			break;
 		}
 
@@ -224,12 +224,12 @@ void processStatistics() {
 		case 0:
 			setColor(10);
 			system("cls");
-			printf("\n\t\t\t\t\t\tRETURN TO MAIN SCREEN\n");
+			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
 			break;
 		default:
 			setColor(4);
 			system("cls");
-			printf("\n\t\t\t\t\tYOU EXCEEDED FUNCTION OPTIONS, PLEASE SELECT VALID OPTION\n");
+			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
 			break;
 		}
 	} while (choice != 0);
