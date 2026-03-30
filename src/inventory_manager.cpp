@@ -27,27 +27,27 @@ void createInventory(Product inventory[MAXSIZE], int& nSP) {
 void importStock(Product inventory[MAXSIZE], int* product_count) {
 	int product_id, additional_quantity;
 
-	printf("\n\t\t\t\t\t\tENTER PRODUCT ID TO IMPORT: ");
+	printf("\n\t\t\t\t\t\tNHAP TEN SAN PHAM DE THEM VAO KHO: ");
 	scanf("%d", &product_id);
 
 	int index = findProductById(inventory, *product_count, product_id);
 
 	if (index == -1) {
-		printf("\n\t\t\t\t\t\tPRODUCT ID NOT FOUND!");
+		printf("\n\t\t\t\t\t\tKHONG TIM THAY SAN PHAM!");
 		return;
 	}
 	else {
-		printf("\n\t\t\t\t\t\tQUANTITY TO ADD: ");
+		printf("\n\t\t\t\t\t\tSO LUONG THEM VAO KHO: ");
 		scanf("%d", &additional_quantity);
 		while (getchar() != '\n');
 
 		if (additional_quantity <= 0) {
-			printf("\n\t\t\t\t\t\tERROR: INVALID QUANTITY!");
+			printf("\n\t\t\t\t\t\tSO LUONG KHONG HOP LE!");
 			return;
 		}
 		else {
 			inventory[index].stock_quantity += additional_quantity;
-			printf("\n\t\t\t\t\t\tSUCCESS! NEW STOCK: %d", inventory[index].stock_quantity);
+			printf("\n\t\t\t\t\t\THANH CONG! SAN PHAM MOI: %d", inventory[index].stock_quantity);
 		}
 	}
 }

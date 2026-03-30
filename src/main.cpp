@@ -12,7 +12,7 @@ void startApp() {
 	do {
 		showMainMenu();
 		setColor(10);
-		printf("\n\t\t\t\t\t\t->SELECT FUNCTION: "); scanf("%d", &menu_choice);
+		printf("\n\t\t\t\t\t\t->VUI LONG CHON CHUC NANG: "); scanf("%d", &menu_choice);
 		switch (menu_choice) {
 		case 1:
 			processInventory(inventory, &product_count);
