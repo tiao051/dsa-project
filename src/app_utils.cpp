@@ -39,7 +39,7 @@ void processInventory(Product inventory[MAXSIZE], int* product_count) {
 				break;
 			case 5:
 				setColor(7);
-				displayInventory(inventory, *product_count);
+				deleteProduct(inventory, product_count);
 				pause();
 				break;
 			case 0:

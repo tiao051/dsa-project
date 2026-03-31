@@ -100,11 +100,20 @@ OrderNode* createOrderNode(Order x);
 CustomerNode* createCustomerNode(Customer x);
 
 // File I/O
-void loadProductRecord(Product inv[], FILE* file_ptr);
+void loadProductRecord(Product inv[], FILE* file_ptr, int count);
 void loadInventoryFile(const char* filename, Product inv[], int* count);
 void loadCustomerRecord(FILE* file_ptr, Customer* customer_ptr);
 void loadCustomerFile(const char* filename, CustomerList* list, int* count);
 void appendCustomerToFile(const char* filename, Customer* customer);
+void appendProductToFile(const char* filename, Product* product);
+void saveInventoryToFile(const char* filename, Product inventory[], int count);
+void updateCustomerCountInFile(const char* filename);
+void decreaseCustomerCountInFile(const char* filename);
+void updateProductCountInFile(const char* filename);
+void decreaseProductCountInFile(const char* filename);
+void generateNextCustomerId(char* id);
+void generateNextProductId(int* id);
+void trimString(char* str);
 
 // Core Operations - Order Queue
 int enqueueOrder(OrderQueue* q, Order x);
@@ -130,6 +139,7 @@ void sortCustomersBySpentDesc(CustomerList* l);
 void createInventory(Product inv[], int* count);
 void importStock(Product inv[], int* count);
 void updateInventory(Product inv[], int* count);
+void deleteProduct(Product inv[], int* count);
 void displayInventory(Product inv[], int count);
 
 // Display

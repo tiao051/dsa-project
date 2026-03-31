@@ -10,8 +10,8 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 	int c;
 	while ((c = getchar()) != '\n' && c != EOF);
 
-	// Auto-generate product ID
-	inventory[*nSP].id = 101 + *nSP;
+	// Auto-generate product ID based on file
+	generateNextProductId(&inventory[*nSP].id);
 
 	// Validate product name
 	do {
@@ -33,7 +33,7 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 		}
 
 		if (exists) {
-			setColor(4); printf("\t\t\t\t\t\t[!] San pham da ton tai trong kho!\n"); setColor(7);
+			setColor(4); printf("\t\t\t\t\t\t[!] SAN PHAM DA TON TAI TRONG KHO!\n"); setColor(7);
 			inventory[*nSP].name[0] = '\0'; // Clear name to trigger re-entry
 		}
 	} while (strlen(inventory[*nSP].name) == 0);
@@ -76,23 +76,40 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 	printf("\n\t\t\t\t\t\tSo luong: %d", inventory[*nSP - 1].stock_quantity);
 	printf("\n\t\t\t\t\t\tDon gia: %lld", inventory[*nSP - 1].price);
 
+	// Save product to file
+	appendProductToFile("data/inventory.txt", &inventory[*nSP - 1]);
 }
 
 void importStock(Product inventory[MAXSIZE], int* product_count) {
 	int product_id, additional_quantity;
 
-	printf("\n\t\t\t\t\t\tNHAP TEN SAN PHAM DE THEM VAO KHO: ");
-	scanf("%d", &product_id);
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF);
+
+	printf("\n\t\t\t\t\t\tNHAP ID SAN PHAM DE THEM VAO KHO: ");
+	if (scanf("%d", &product_id) != 1) {
+		while (getchar() != '\n');
+		printf("\n\t\t\t\t\t\tID SAN PHAM KHONG HOP LE!");
+		return;
+	}
 
 	int index = findProductById(inventory, *product_count, product_id);
 
 	if (index == -1) {
 		printf("\n\t\t\t\t\t\tKHONG TIM THAY SAN PHAM!");
+		while (getchar() != '\n');
 		return;
 	}
 	else {
+		// Display product name to confirm
+		printf("\n\t\t\t\t\t\tSAN PHAM CHUAN BI DUOC THEM VAO: %s", inventory[index].name);
+		
 		printf("\n\t\t\t\t\t\tSO LUONG THEM VAO KHO: ");
-		scanf("%d", &additional_quantity);
+		if (scanf("%d", &additional_quantity) != 1) {
+			while (getchar() != '\n');
+			printf("\n\t\t\t\t\t\tSO LUONG KHONG HOP LE!");
+			return;
+		}
 		while (getchar() != '\n');
 
 		if (additional_quantity <= 0) {
@@ -105,45 +122,67 @@ void importStock(Product inventory[MAXSIZE], int* product_count) {
 				return;
 			}
 			inventory[index].stock_quantity += additional_quantity;
-			printf("\n\t\t\t\t\t\THANH CONG! SAN PHAM MOI: %d", inventory[index].stock_quantity);
+			printf("\n\t\t\t\t\t\tTHANH CONG! %s, SO LUONG TON: %d", inventory[index].name, inventory[index].stock_quantity);
+			
+			// Save updated inventory to file
+			saveInventoryToFile("data/inventory.txt", inventory, *product_count);
 		}
 	}
 }
 
 void updateInventory(Product inventory[MAXSIZE], int* product_count) {
-	char search_name[50];
-	AmountType new_price;
+	int product_id;
+	AmountType new_price, old_price;
 
 	int c;
 	while ((c = getchar()) != '\n' && c != EOF);
 
-	printf("\n\t\t\t\t\t\tNhap ten san pham can cap nhat: ");
-	fgets(search_name, sizeof(search_name), stdin);
-	search_name[strcspn(search_name, "\n")] = '\0';
-
-	int find = -1;
-	for (int i = 0; i < *product_count; i++) {
-		if (_stricmp(inventory[i].name, search_name) == 0) {
-			find = i;
-			break;
-		}
+	printf("\n\t\t\t\t\t\tNhap ID san pham can cap nhat: ");
+	if (scanf("%d", &product_id) != 1) {
+		while (getchar() != '\n');
+		printf("\n\t\t\t\t\t\tID SAN PHAM KHONG HOP LE!");
+		return;
 	}
+
+	int find = findProductById(inventory, *product_count, product_id);
 
 	if (find == -1){
 		printf("\n\t\t\t\t\t\tKHONG TIM THAY SAN PHAM!");
+		while (getchar() != '\n');
 		return;
 	}
 	else {
+		// Display product name to confirm
+		printf("\n\t\t\t\t\t\tSAN PHAM CHUAN BI DUOC CAP NHAT: %s", inventory[find].name);
+		
+		old_price = inventory[find].price;
 		printf("\n\t\t\t\t\t\tNhap don gia moi: ");
-		scanf("%lld", &new_price);
-		getchar();
-		if (new_price <= 0) {
-			setColor(4); printf("\n\t\t\t\t\t\tDON GIA KHONG HOP LE!"); setColor(7);
+		if (scanf("%lld", &new_price) != 1) {
+			while (getchar() != '\n');
+			printf("\n\t\t\t\t\t\tDON GIA KHONG HOP LE!");
+			return;
+		}
+		while (getchar() != '\n');
+		
+		// Validate price
+		if (new_price < 0) {
+			setColor(4); printf("\n\t\t\t\t\t\tDON GIA KHONG DUOC AM!"); setColor(7);
+			return;
+		}
+		else if (new_price == 0) {
+			setColor(4); printf("\n\t\t\t\t\t\tDON GIA PHAI LON HON 0!"); setColor(7);
+			return;
+		}
+		else if (new_price == old_price) {
+			setColor(3); printf("\n\t\t\t\t\t\tDON GIA MOI BANG DON GIA CU!"); setColor(7);
 			return;
 		}
 		else {
 			inventory[find].price = new_price;
-			printf("\n\t\t\t\t\t\THANH CONG! DON GIA MOI: %lld", inventory[find].price);
+			printf("\n\t\t\t\t\t\tTHANH CONG! %s, DON GIA MOI: %lld", inventory[find].name, inventory[find].price);
+			
+			// Save updated inventory to file
+			saveInventoryToFile("data/inventory.txt", inventory, *product_count);
 		}
 	}
 }
@@ -161,4 +200,60 @@ void displayInventory(Product inventory[MAXSIZE], int product_count) {
 			inventory[i].sold_quantity);
 	}
 	printf("\t\t\t\t---------------------------------------------------------------------------------------\n");
+}
+
+void deleteProduct(Product inventory[MAXSIZE], int* product_count) {
+	int product_id;
+	char confirm;
+	char product_name[100];
+
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF);
+
+	printf("\n\t\t\t\t\t\tNhap ID san pham can xoa: ");
+	if (scanf("%d", &product_id) != 1) {
+		while (getchar() != '\n');
+		printf("\n\t\t\t\t\t\tID SAN PHAM KHONG HOP LE!");
+		return;
+	}
+
+	int find = findProductById(inventory, *product_count, product_id);
+
+	if (find == -1) {
+		printf("\n\t\t\t\t\t\tKHONG TIM THAY SAN PHAM!");
+		while (getchar() != '\n');
+		return;
+	}
+	else {
+		// Display product to confirm deletion
+		printf("\n\t\t\t\t\t\tSAN PHAM CAN XOA: %s", inventory[find].name);
+		printf("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
+		
+		// Clear buffer before reading character
+		int c;
+		while ((c = getchar()) != '\n' && c != EOF);
+		
+		scanf("%c", &confirm);
+		while (getchar() != '\n');
+
+		if (confirm != 'Y' && confirm != 'y') {
+			printf("\n\t\t\t\t\t\tHUY BO XOA SAN PHAM!");
+			return;
+		}
+
+		// Save product name before deletion
+		strcpy(product_name, inventory[find].name);
+
+		// Shift all products after the deleted one
+		for (int i = find; i < *product_count - 1; i++) {
+			inventory[i] = inventory[i + 1];
+		}
+
+		(*product_count)--;
+		printf("\n\t\t\t\t\t\tTHANH CONG! SAN PHAM %s DA DUOC XOA", product_name);
+
+		// Save updated inventory to file
+		saveInventoryToFile("data/inventory.txt", inventory, *product_count);
+		decreaseProductCountInFile("data/inventory.txt");
+	}
 }

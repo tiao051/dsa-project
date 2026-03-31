@@ -33,7 +33,7 @@ void menuInventory(){
 	printf("\t\t\t\t\t\t|2. Them san pham                                     |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|3. Nhap them hang                                    |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|4. Cap nhat gia san pham                             |\t\t\t\t\t\n");
-	printf("\t\t\t\t\t\t|5. Xuat danh sach kho san pham                       |\t\t\t\t\t\n");
+	printf("\t\t\t\t\t\t|5. Xoa san pham                                      |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }
