@@ -201,7 +201,7 @@ void processCustomer(CustomerList* customer_list) {
 			break;
 		case 3:
 			setColor(7);
-			autoUpgradeCustomerTier(customer_list);
+			adjustCustomerTierManual(customer_list);
 			pause();
 			break;
 		case 4:

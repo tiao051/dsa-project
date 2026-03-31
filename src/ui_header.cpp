@@ -16,6 +16,6 @@ void printOrderHeader() {
 //TIÊU ĐỀ KHÁCH HÀNG
 void printCustomerHeader() {
 	printf("\t\t| %-12s | %-20s | %-12s | %-8s | %-12s | %12s |\n",
-		"MaKH", "TenKH", "DienThoai", "UuTien", "TrangThai", "TongTien");
+		"MaKH", "TenKH", "DienThoai", "Hang", "TrangThai", "TongTien");
 	printf("\t\t|--------------|----------------------|--------------|----------|--------------|--------------|\n");
 }

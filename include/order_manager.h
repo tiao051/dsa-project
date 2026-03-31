@@ -124,6 +124,7 @@ void insertOrderManual(OrderQueue* q);
 int insertCustomerTail(CustomerList* l, Customer x);
 void registerNewCustomer(CustomerList* l);
 void autoUpgradeCustomerTier(CustomerList* l);
+void adjustCustomerTierManual(CustomerList* l);
 
 // Validation helpers
 int isNumeric(const char* str);

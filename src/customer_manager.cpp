@@ -61,6 +61,28 @@ int isCustomerNameDuplicate(CustomerList* list, const char* name) {
 	return 0;  // No duplicate
 }
 
+static const char* getTierName(CustomerTier tier) {
+	if (tier == TIER_NORMAL) return "Thuong";
+	if (tier == TIER_VIP) return "VIP";
+	return "Express";
+}
+
+static long long getMinSpentByTier(CustomerTier tier) {
+	if (tier == TIER_VIP) return 3000000;
+	if (tier == TIER_EXPRESS) return 10000000;
+	return 0;
+}
+
+static int countCustomers(CustomerList* customer_list) {
+	int count = 0;
+	CustomerNode* node = customer_list->head;
+	while (node != NULL) {
+		count++;
+		node = node->next;
+	}
+	return count;
+}
+
 // Register new customer
 void registerNewCustomer(CustomerList* customer_list) {
 	Customer customer;
@@ -111,7 +133,7 @@ void registerNewCustomer(CustomerList* customer_list) {
 	if (insertCustomerTail(customer_list, customer)) {
 		printf("\n\t\t\t\t\t\t->THEM KHACH HANG THANH CONG");
 		printf("\n\t\t\t\t\t\tID: %s", customer.id);
-		printf("\n\t\t\t\t\t\tLevel: Khach vang lai (Mac dinh)");
+		printf("\n\t\t\t\t\t\tHang: %s (Mac dinh)", getTierName(customer.tier));
 		printf("\n\t\t\t\t\t\tTrang thai: %s (Mac dinh)", getDisplayStatus(customer.status));
 		appendCustomerToFile("data/customers.txt", &customer);
 	}
@@ -124,11 +146,11 @@ void registerNewCustomer(CustomerList* customer_list) {
 void printSingleCustomer(Customer customer) {
 	char maKH[20];
 	sprintf(maKH, "CustID%s", customer.id);
-	printf("\t\t| %-12s | %-20s | %-12s | %-8d | %-12s | %12lld |\n",
+	printf("\t\t| %-12s | %-20s | %-12s | %-8s | %-12s | %12lld |\n",
 			maKH,
 			customer.name,
 			customer.phone,
-			customer.tier,
+			getTierName(customer.tier),
 			getDisplayStatus(customer.status),
 			customer.total_spent);
 }
@@ -179,6 +201,114 @@ void autoUpgradeCustomerTier(CustomerList* customer_list) {
 	setColor(2);
 	printf("\n\t\t\t\t\t\tDA CAP NHAT HANG THANH VIEN!");
 	setColor(7);
+}
+
+void adjustCustomerTierManual(CustomerList* customer_list) {
+	if (customer_list == NULL || customer_list->head == NULL) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Danh sach khach hang trong!");
+		setColor(7);
+		return;
+	}
+
+	int action = 0;
+	printf("\n\t\t\t\t\t\tCHON CHUC NANG (1. Nang hang | 2. Ha hang): ");
+	scanf("%d", &action);
+
+	if (action != 1 && action != 2) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Lua chon khong hop le!");
+		setColor(7);
+		return;
+	}
+
+	char customer_name[100];
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF);
+
+	if (action == 1) {
+		printf("\n\t\t\t\t\t\tNhap ten khach hang can nang hang: ");
+	}
+	else {
+		printf("\n\t\t\t\t\t\tNhap ten khach hang can ha hang: ");
+	}
+	fgets(customer_name, sizeof(customer_name), stdin);
+	customer_name[strcspn(customer_name, "\n")] = '\0';
+	trimString(customer_name);
+
+	if (strlen(customer_name) == 0) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Ten khach hang khong duoc de trong!");
+		setColor(7);
+		return;
+	}
+
+	CustomerNode* customer_node = findCustomerByName(customer_list, customer_name);
+	if (customer_node == NULL) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Khong tim thay khach hang ten: %s", customer_name);
+		setColor(7);
+		return;
+	}
+
+	Customer* customer = &customer_node->info;
+	if (action == 1) {
+		if (customer->tier == TIER_EXPRESS) {
+			setColor(3);
+			printf("\n\t\t\t\t\t\tKhach hang %s dang o hang cao nhat!", customer->name);
+			setColor(7);
+			return;
+		}
+
+		CustomerTier target_tier = (CustomerTier)(customer->tier + 1);
+		long long min_spent = getMinSpentByTier(target_tier);
+		char confirm;
+
+		printf("\n\t\t\t\t\t\tDe nang len hang %s can tong tien tieu la %lld", getTierName(target_tier), min_spent);
+		printf("\n\t\t\t\t\t\tVan muon nang %s len hang %s? (Y/N): ", customer->name, getTierName(target_tier));
+		scanf(" %c", &confirm);
+
+		if (confirm == 'Y' || confirm == 'y') {
+			customer->tier = target_tier;
+			int count = countCustomers(customer_list);
+			saveCustomerFile("data/customers.txt", customer_list, count);
+			setColor(2);
+			printf("\n\t\t\t\t\t\t-> NANG HANG KHACH HANG THANH CONG!");
+			setColor(7);
+		}
+		else {
+			setColor(3);
+			printf("\n\t\t\t\t\t\tDA HUY THAO TAC NANG HANG!");
+			setColor(7);
+		}
+	}
+	else {
+		if (customer->tier == TIER_NORMAL) {
+			setColor(3);
+			printf("\n\t\t\t\t\t\tKhach hang %s dang o hang thap nhat!", customer->name);
+			setColor(7);
+			return;
+		}
+
+		CustomerTier target_tier = (CustomerTier)(customer->tier - 1);
+		char confirm;
+		printf("\n\t\t\t\t\t\tBan co chac chan muon ha hang khach hang %s xuong hang %s? (Y/N): ", customer->name, getTierName(target_tier));
+		scanf(" %c", &confirm);
+
+		if (confirm == 'Y' || confirm == 'y') {
+			customer->tier = target_tier;
+			int count = countCustomers(customer_list);
+			saveCustomerFile("data/customers.txt", customer_list, count);
+			setColor(2);
+			printf("\n\t\t\t\t\t\t-> HA HANG KHACH HANG THANH CONG!");
+			setColor(7);
+		}
+		else {
+			setColor(3);
+			printf("\n\t\t\t\t\t\tDA HUY THAO TAC HA HANG!");
+			setColor(7);
+		}
+	}
 }
 
 // Delete customer

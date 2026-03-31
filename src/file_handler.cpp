@@ -64,6 +64,18 @@ void loadCustomerRecord(FILE* file_ptr, Customer* customer_ptr) {
 		&customer_ptr->total_spent);
 }
 
+static void clearCustomerList(CustomerList* list) {
+	if (list == NULL) return;
+	CustomerNode* node = list->head;
+	while (node != NULL) {
+		CustomerNode* next = node->next;
+		delete node;
+		node = next;
+	}
+	list->head = NULL;
+	list->tail = NULL;
+}
+
 // Load entire customer file
 void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 	FILE* file_ptr = fopen(filename, "rt");
@@ -72,23 +84,46 @@ void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 		return;
 	}
 
-	fscanf(file_ptr, "%d\n", count);
-	int i = 0;
-	while (i < *count) {
+	clearCustomerList(list);
+	if (fscanf(file_ptr, "%d\n", count) != 1) {
+		*count = 0;
+		fclose(file_ptr);
+		return;
+	}
+
+	int loaded_count = 0;
+	char line[512];
+	while (loaded_count < *count && fgets(line, sizeof(line), file_ptr) != NULL) {
 		Customer customer;
-		loadCustomerRecord(file_ptr, &customer);
-		
+		char extra[256];
+		extra[0] = '\0';
+
+		int parsed = sscanf(line, "%36[^,],%99[^,],%99[^,],%d,%99[^,],%lld,%255[^\n]",
+			customer.id,
+			customer.name,
+			customer.phone,
+			(int*)&customer.tier,
+			customer.status,
+			&customer.total_spent,
+			extra);
+
+		if (parsed < 6) {
+			continue;
+		}
+
 		// Trim whitespace from customer data
 		trimString(customer.id);
 		trimString(customer.name);
 		trimString(customer.phone);
 		trimString(customer.status);
-		
+
 		initOrderQueue(&customer.history);
-		customer.total_spent = 0;
-		insertCustomerTail(list, customer);
-		i++;
+		if (insertCustomerTail(list, customer)) {
+			loaded_count++;
+		}
 	}
+
+	*count = loaded_count;
 
 	fclose(file_ptr);
 }
