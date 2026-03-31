@@ -206,7 +206,7 @@ void processCustomer(CustomerList* customer_list) {
 			break;
 		case 4:
 			setColor(7);
-			displayCustomerList(customer_list);
+			deleteCustomer(customer_list);
 			pause();
 			break;
 		case 0:

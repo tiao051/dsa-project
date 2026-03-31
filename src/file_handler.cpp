@@ -253,3 +253,30 @@ void decreaseCustomerCountInFile(const char* filename) {
 
 	fclose(file_ptr);
 }
+
+// Save entire customer list to file
+void saveCustomerFile(const char* filename, CustomerList* list, int count) {
+	FILE* file_ptr = fopen(filename, "w+t");
+	if (file_ptr == NULL) {
+		printf("\n\t\t\t\t\t\tLoi ghi file %s.", filename);
+		return;
+	}
+
+	// Write count first
+	fprintf(file_ptr, "%d\n", count);
+
+	// Write all customer records
+	CustomerNode* node = list->head;
+	while (node != NULL) {
+		fprintf(file_ptr, "%s,%s,%s,%d,%s,%lld\n",
+			node->info.id,
+			node->info.name,
+			node->info.phone,
+			node->info.tier,
+			node->info.status,
+			node->info.total_spent);
+		node = node->next;
+	}
+
+	fclose(file_ptr);
+}

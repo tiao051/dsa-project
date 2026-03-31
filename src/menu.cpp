@@ -47,7 +47,7 @@ void menuCustomer() {
 	printf("\t\t\t\t\t\t|1. Load danh sach khach hang                         |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. Dang ky them thanh vien moi                       |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|3. Nang hang thanh vien                              |\t\t\t\t\t\n");
-	printf("\t\t\t\t\t\t|4. Xuat danh sach khach hang                         |\t\t\t\t\t\n");
+	printf("\t\t\t\t\t\t|4. Xoa khach hang                                    |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }

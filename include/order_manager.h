@@ -125,6 +125,17 @@ int insertCustomerTail(CustomerList* l, Customer x);
 void registerNewCustomer(CustomerList* l);
 void autoUpgradeCustomerTier(CustomerList* l);
 
+// Validation helpers
+int isNumeric(const char* str);
+int isValidName(const char* name);
+int isCustomerNameDuplicate(CustomerList* list, const char* name);
+
+// File I/O for customers
+void saveCustomerFile(const char* filename, CustomerList* list, int count);
+
+// Customer operations
+void deleteCustomer(CustomerList* customer_list);
+
 // Search & Sort
 OrderNode* findOrderById(OrderQueue* q, int id);
 CustomerNode* findCustomerByName(CustomerList* l, const char* name);
