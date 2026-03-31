@@ -234,7 +234,6 @@ void deleteProduct(Product inventory[MAXSIZE], int* product_count) {
 		while ((c = getchar()) != '\n' && c != EOF);
 		
 		scanf("%c", &confirm);
-		while (getchar() != '\n');
 
 		if (confirm != 'Y' && confirm != 'y') {
 			printf("\n\t\t\t\t\t\tHUY BO XOA SAN PHAM!");

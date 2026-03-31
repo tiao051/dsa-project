@@ -205,11 +205,13 @@ void deleteCustomer(CustomerList* customer_list) {
 	// Find customer
 	while (node != NULL) {
 		if (strcmp(node->info.name, name) == 0) {
-			printf("\n\t\t\t\t\t\tTim thay khach hang: %s", node->info.name);
-			printf("\n\t\t\t\t\t\nBan co chac chan muon xoa? (Y/N): ");
+			printf("\n\t\t\t\t\t\tKHACH HANG CAN XOA: %s", node->info.name);
+			printf("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
 
 			char confirm;
+			int c;
 			scanf("%c", &confirm);
+			while ((c = getchar()) != '\n' && c != EOF);
 
 			if (confirm == 'Y' || confirm == 'y') {
 				// Remove from list
@@ -237,7 +239,7 @@ void deleteCustomer(CustomerList* customer_list) {
 				setColor(7);
 			} else {
 				setColor(3);
-				printf("\n\t\t\t\t\t\tHuy phep xoa.");
+				printf("\n\t\t\t\t\t\tHUY BO XOA KHACH HANG!");
 				setColor(7);
 			}
 			return;
