@@ -5,6 +5,27 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Source Files\Core">
+      <UniqueIdentifier>{2A69179A-7C32-4C82-B2E7-2DAA7A577201}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{A42F6FD3-0A3E-43D8-9F66-0F7CC00B074F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Customers">
+      <UniqueIdentifier>{6DA39DEE-53C9-4B40-A03D-55B9A2D7E8B4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Inventory">
+      <UniqueIdentifier>{9BFE3A79-A45D-4302-940A-59E13B47F5F4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Orders">
+      <UniqueIdentifier>{4F48F828-C194-4D1A-A33B-0D87FD78A19B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Search">
+      <UniqueIdentifier>{4D10F8A9-65D6-4468-9EA4-8652C812D1F2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{5C2DEB51-D71B-4E3A-8034-7B7A0F26B8E6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
@@ -20,44 +41,44 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\advanced_features.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\core\advanced_features.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\app_utils.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\core\app_utils.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\console_utils.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\core\main.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\customer_linked_list.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\common\console_utils.cpp">
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="src\customer_manager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\common\file_handler.cpp">
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\customers\customer_linked_list.cpp">
+      <Filter>Source Files\Customers</Filter>
     </ClCompile>
-    <ClCompile Include="src\order_manager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\customers\customer_manager.cpp">
+      <Filter>Source Files\Customers</Filter>
     </ClCompile>
-    <ClCompile Include="src\order_queue.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\inventory\inventory_manager.cpp">
+      <Filter>Source Files\Inventory</Filter>
     </ClCompile>
-    <ClCompile Include="src\menu.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\orders\order_manager.cpp">
+      <Filter>Source Files\Orders</Filter>
     </ClCompile>
-    <ClCompile Include="src\inventory_manager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\orders\order_queue.cpp">
+      <Filter>Source Files\Orders</Filter>
     </ClCompile>
-    <ClCompile Include="src\file_handler.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\search\search_sort.cpp">
+      <Filter>Source Files\Search</Filter>
     </ClCompile>
-    <ClCompile Include="src\search_sort.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\ui\menu.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="src\ui_header.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\ui\ui_header.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
