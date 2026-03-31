@@ -176,6 +176,8 @@ void menuStatistics();
 // Utilities
 void setColor(int color_code);
 void pause();
+void clearInputBuffer();
+void showErrorMessage(const char* message);
 
 // Secondary Process Functions
 void processStatistics();

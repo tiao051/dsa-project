@@ -33,28 +33,17 @@ static int getReservedQuantityInQueue(OrderQueue* q, const char* product_name) {
 	return reserved;
 }
 
-static void clearInputBuffer() {
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF) {}
-}
-
-static void showInputError(const char* message) {
-	setColor(4);
-	printf("\n\t\t\t\t\t\t%s", message);
-	setColor(7);
-}
-
 static int readOrderId(OrderQueue* q, int* out_order_id) {
 	printf("\n\t\t\t\t\t\tNhap Ma Don: ");
 	if (scanf("%d", out_order_id) != 1 || *out_order_id <= 0) {
 		clearInputBuffer();
-		showInputError("[!] Ma don khong hop le!");
+		showErrorMessage("[!] Ma don khong hop le!");
 		return 0;
 	}
 
 	if (findOrderById(q, *out_order_id) != NULL) {
 		clearInputBuffer();
-		showInputError("[!] Ma don da ton tai trong hang doi!");
+		showErrorMessage("[!] Ma don da ton tai trong hang doi!");
 		return 0;
 	}
 
@@ -69,7 +58,7 @@ static int readTrimmedLine(const char* prompt, char* output, size_t output_size,
 	trimString(output);
 
 	if (strlen(output) == 0) {
-		showInputError(empty_message);
+		showErrorMessage(empty_message);
 		return 0;
 	}
 	return 1;
@@ -110,7 +99,7 @@ static int readOrderQuantity(int* out_quantity) {
 	printf("\n\t\t\t\t\t\tNhap So Luong San Pham: ");
 	if (scanf("%d", out_quantity) != 1 || *out_quantity <= 0) {
 		clearInputBuffer();
-		showInputError("[!] So luong khong hop le!");
+		showErrorMessage("[!] So luong khong hop le!");
 		return 0;
 	}
 	clearInputBuffer();

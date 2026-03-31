@@ -83,17 +83,6 @@ static int countCustomers(CustomerList* customer_list) {
 	return count;
 }
 
-static void clearInputBuffer() {
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF) {}
-}
-
-static void showCustomerError(const char* message) {
-	setColor(4);
-	printf("\t\t\t\t\t\t%s\n", message);
-	setColor(7);
-}
-
 static int readValidCustomerName(CustomerList* customer_list, char* out_name, size_t out_size) {
 	do {
 		printf("\n\t\t\t\t\t\tNhap ten khach hang: ");
@@ -102,13 +91,13 @@ static int readValidCustomerName(CustomerList* customer_list, char* out_name, si
 		trimString(out_name);
 
 		if (strlen(out_name) == 0) {
-			showCustomerError("[!] Ten khach hang khong duoc de trong!");
+			showErrorMessage("[!] Ten khach hang khong duoc de trong!");
 		}
 		else if (!isValidName(out_name)) {
-			showCustomerError("[!] Ten khach hang khong duoc chua so hoac ki tu dac biet!");
+			showErrorMessage("[!] Ten khach hang khong duoc chua so hoac ki tu dac biet!");
 		}
 		else if (isCustomerNameDuplicate(customer_list, out_name)) {
-			showCustomerError("[!] Ten khach hang nay da ton tai!");
+			showErrorMessage("[!] Ten khach hang nay da ton tai!");
 		}
 	} while (strlen(out_name) == 0 || !isValidName(out_name) || isCustomerNameDuplicate(customer_list, out_name));
 
@@ -123,7 +112,7 @@ static int readValidCustomerPhone(char* out_phone, size_t out_size) {
 		trimString(out_phone);
 
 		if (!isNumeric(out_phone)) {
-			showCustomerError("[!] So dien thoai khong hop le");
+			showErrorMessage("[!] So dien thoai khong hop le");
 		}
 	} while (!isNumeric(out_phone));
 

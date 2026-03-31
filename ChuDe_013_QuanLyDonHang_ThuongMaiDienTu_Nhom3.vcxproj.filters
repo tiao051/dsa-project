@@ -26,6 +26,9 @@
     <ClCompile Include="src\app_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\console_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\customer_linked_list.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
