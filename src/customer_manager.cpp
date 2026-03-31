@@ -91,8 +91,10 @@ void registerNewCustomer(CustomerList* customer_list) {
 
 // Print single customer
 void printSingleCustomer(Customer customer) {
-	printf("\t\t\t| CustID%-10s | %-25s | %-15s | %-8d | %-12s | %12lld |\n",
-			customer.id,
+	char maKH[20];
+	sprintf(maKH, "CustID%s", customer.id);
+	printf("\t\t| %-12s | %-20s | %-12s | %-8d | %-12s | %12lld |\n",
+			maKH,
 			customer.name,
 			customer.phone,
 			customer.tier,
