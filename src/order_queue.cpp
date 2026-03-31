@@ -1,9 +1,5 @@
 ﻿#include "../include/order_manager.h"
 
-// Define missing defines for priority levels
-#define PRIORITY_EXPRESS PRIORITY_EXPRESS
-#define PRIORITY_VIP PRIORITY_VIP
-
 OrderNode* createOrderNode(Order x) {
 	OrderNode* node = new OrderNode();
 	if (node == NULL) return NULL;
@@ -23,51 +19,33 @@ void initOrderQueue(OrderQueue* q) {
 // Core Operations - Order Queue
 int enqueueOrder(OrderQueue* q, Order order) {
 	OrderNode* node = createOrderNode(order);
+	if (node == NULL) return 0;
 
 	if (isOrderQueueEmpty(q) == 1) {
 		q->head = q->tail = node;
 		return 1;
 	}
-	else {
-		// EXPRESS/HOATOC priority
-		if (order.priority == PRIORITY_EXPRESS) {
-			OrderNode* cur = q->head;
-			OrderNode* prev = NULL;
-			while (cur != NULL && cur->info.priority == order.priority)
-			{
-				prev = cur;
-				cur = cur->next;
-			}
-			if (prev == NULL) {
-				node->next = q->head;
-				q->head = node;
-			}
-			else {
-				prev->next = node;
-				node->next = cur;
-			}
-			return 1;
-		}
-		// VIP priority
-		else if (order.priority == PRIORITY_VIP) {
-			OrderNode* cur = q->head;
-			OrderNode* prev = NULL;
-			while (cur != NULL && cur->info.priority < order.priority) {
-				prev = cur;
-				cur = cur->next;
-			}
-			prev->next = node;
-			node->next = cur;
-			if (prev == NULL) q->tail = node;
-			return 1;
-		}
-		// NORMAL priority
-		else {
-			q->tail->next = node;
-			q->tail = node;
-			return 1;
-		}
+
+	// Priority queue: Express (2) > VIP (1) > Thuong (0), stable in same priority
+	if (order.priority > q->head->info.priority) {
+		node->next = q->head;
+		q->head = node;
+		return 1;
 	}
+
+	OrderNode* prev = q->head;
+	OrderNode* cur = q->head->next;
+	while (cur != NULL && cur->info.priority >= order.priority) {
+		prev = cur;
+		cur = cur->next;
+	}
+
+	prev->next = node;
+	node->next = cur;
+	if (cur == NULL) {
+		q->tail = node;
+	}
+	return 1;
 
 }
 
@@ -90,8 +68,10 @@ int dequeueOrder(OrderQueue* q, Order* out_order) {
 		if (strcmp(inventory[i].name, temp->info.product_name) == 0) {
 			inventory[i].stock_quantity -= temp->info.quantity;
 			inventory[i].sold_quantity += temp->info.quantity;
+			break;
 		}
 	}
+	saveInventoryToFile("data/inventory.txt", inventory, product_count);
 	q->head = q->head->next;
 	if (q->head == NULL) q->tail = NULL;
 	delete(temp);

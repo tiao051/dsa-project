@@ -58,7 +58,7 @@ void menuOrder() {
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	printf("\t\t\t\t\t\t|1. Tao danh sach don hang                            |\t\t\t\t\t\n");
+	printf("\t\t\t\t\t\t|1. Them don hang                                     |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. Xu ly don hang                                    |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|3. Xuat danh sach don hang                           |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
