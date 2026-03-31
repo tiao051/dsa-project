@@ -83,41 +83,65 @@ static int countCustomers(CustomerList* customer_list) {
 	return count;
 }
 
+static void clearInputBuffer() {
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF) {}
+}
+
+static void showCustomerError(const char* message) {
+	setColor(4);
+	printf("\t\t\t\t\t\t%s\n", message);
+	setColor(7);
+}
+
+static int readValidCustomerName(CustomerList* customer_list, char* out_name, size_t out_size) {
+	do {
+		printf("\n\t\t\t\t\t\tNhap ten khach hang: ");
+		fgets(out_name, (int)out_size, stdin);
+		out_name[strcspn(out_name, "\n")] = '\0';
+		trimString(out_name);
+
+		if (strlen(out_name) == 0) {
+			showCustomerError("[!] Ten khach hang khong duoc de trong!");
+		}
+		else if (!isValidName(out_name)) {
+			showCustomerError("[!] Ten khach hang khong duoc chua so hoac ki tu dac biet!");
+		}
+		else if (isCustomerNameDuplicate(customer_list, out_name)) {
+			showCustomerError("[!] Ten khach hang nay da ton tai!");
+		}
+	} while (strlen(out_name) == 0 || !isValidName(out_name) || isCustomerNameDuplicate(customer_list, out_name));
+
+	return 1;
+}
+
+static int readValidCustomerPhone(char* out_phone, size_t out_size) {
+	do {
+		printf("\n\t\t\t\t\t\tNhap vao so dien thoai: ");
+		fgets(out_phone, (int)out_size, stdin);
+		out_phone[strcspn(out_phone, "\n")] = '\0';
+		trimString(out_phone);
+
+		if (!isNumeric(out_phone)) {
+			showCustomerError("[!] So dien thoai khong hop le");
+		}
+	} while (!isNumeric(out_phone));
+
+	return 1;
+}
+
+static void saveCurrentCustomerList(CustomerList* customer_list) {
+	int count = countCustomers(customer_list);
+	saveCustomerFile("data/customers.txt", customer_list, count);
+}
+
 // Register new customer
 void registerNewCustomer(CustomerList* customer_list) {
 	Customer customer;
-	char buffer[100];
 
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
-
-	do {
-		printf("\n\t\t\t\t\t\tNhap ten khach hang: ");
-		fgets(customer.name, sizeof(customer.name), stdin);
-		customer.name[strcspn(customer.name, "\n")] = '\0';
-
-		if (strlen(customer.name) == 0) {
-			setColor(4); printf("\t\t\t\t\t\t[!] Ten khach hang khong duoc de trong!\n"); setColor(7);
-		}
-		else if (!isValidName(customer.name)) {
-			setColor(4); printf("\t\t\t\t\t\t[!] Ten khach hang khong duoc chua so hoac ki tu dac biet!\n"); setColor(7);
-		}
-		else if (isCustomerNameDuplicate(customer_list, customer.name)) {
-			setColor(4); printf("\t\t\t\t\t\t[!] Ten khach hang nay da ton tai!\n"); setColor(7);
-		}
-	} while (strlen(customer.name) == 0 || !isValidName(customer.name) || isCustomerNameDuplicate(customer_list, customer.name));
-
-	do {
-		printf("\n\t\t\t\t\t\tNhap vao so dien thoai: ");
-		fgets(customer.phone, sizeof(customer.phone), stdin);
-		customer.phone[strcspn(customer.phone, "\n")] = '\0';
-
-		if (!isNumeric(customer.phone)) {
-			setColor(4);
-			printf("\t\t\t\t\t\t[!] So dien thoai khong hop le\n");
-			setColor(7);
-		}
-	} while (!isNumeric(customer.phone));
+	clearInputBuffer();
+	readValidCustomerName(customer_list, customer.name, sizeof(customer.name));
+	readValidCustomerPhone(customer.phone, sizeof(customer.phone));
 
 	// Set default tier to Normal
 	customer.tier = TIER_NORMAL;
@@ -223,8 +247,7 @@ void adjustCustomerTierManual(CustomerList* customer_list) {
 	}
 
 	char customer_name[100];
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
+	clearInputBuffer();
 
 	if (action == 1) {
 		printf("\n\t\t\t\t\t\tNhap ten khach hang can nang hang: ");
@@ -270,8 +293,7 @@ void adjustCustomerTierManual(CustomerList* customer_list) {
 
 		if (confirm == 'Y' || confirm == 'y') {
 			customer->tier = target_tier;
-			int count = countCustomers(customer_list);
-			saveCustomerFile("data/customers.txt", customer_list, count);
+			saveCurrentCustomerList(customer_list);
 			setColor(2);
 			printf("\n\t\t\t\t\t\t-> NANG HANG KHACH HANG THANH CONG!");
 			setColor(7);
@@ -297,8 +319,7 @@ void adjustCustomerTierManual(CustomerList* customer_list) {
 
 		if (confirm == 'Y' || confirm == 'y') {
 			customer->tier = target_tier;
-			int count = countCustomers(customer_list);
-			saveCustomerFile("data/customers.txt", customer_list, count);
+			saveCurrentCustomerList(customer_list);
 			setColor(2);
 			printf("\n\t\t\t\t\t\t-> HA HANG KHACH HANG THANH CONG!");
 			setColor(7);
@@ -321,8 +342,7 @@ void deleteCustomer(CustomerList* customer_list) {
 	}
 
 	char name[100];
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
+	clearInputBuffer();
 
 	printf("\n\t\t\t\t\t\tNhap ten khach hang can xoa: ");
 	fgets(name, sizeof(name), stdin);
@@ -339,9 +359,8 @@ void deleteCustomer(CustomerList* customer_list) {
 			printf("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
 
 			char confirm;
-			int c;
-			scanf("%c", &confirm);
-			while ((c = getchar()) != '\n' && c != EOF);
+			scanf(" %c", &confirm);
+			clearInputBuffer();
 
 			if (confirm == 'Y' || confirm == 'y') {
 				// Remove from list
@@ -351,18 +370,10 @@ void deleteCustomer(CustomerList* customer_list) {
 					prev->next = node->next;
 				}
 
-				free(node);
+				delete node;
 
 				// Count remaining customers
-				int count = 0;
-				CustomerNode* temp = customer_list->head;
-				while (temp != NULL) {
-					count++;
-					temp = temp->next;
-				}
-
-				// Save updated list to file
-				saveCustomerFile("data/customers.txt", customer_list, count);
+				saveCurrentCustomerList(customer_list);
 
 				setColor(2);
 				printf("\n\t\t\t\t\t\t-> XOA KHACH HANG THANH CONG!");

@@ -4,6 +4,65 @@ int search_order_id;
 const char* INVENTORY_FILE = "data/inventory.txt";
 const char* CUSTOMER_FILE = "data/customers.txt";
 
+static int readMenuChoice() {
+	int choice;
+	setColor(10);
+	printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: ");
+	scanf("%d", &choice);
+	return choice;
+}
+
+static void printBackToMainMessage() {
+	setColor(10);
+	system("cls");
+	printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+}
+
+static void printInvalidChoiceMessage() {
+	setColor(4);
+	system("cls");
+	printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+}
+
+static void processSearchOrderById(OrderQueue* order_queue) {
+	setColor(7);
+	printf("\n\t\t\t\t\t\tNHAP MA DON: ");
+	scanf("%d", &search_order_id);
+	getchar();
+
+	OrderNode* foundOrderNode = findOrderById(order_queue, search_order_id);
+	if (foundOrderNode != NULL) {
+		printf("\n\t\t\t\t\t\tTIM THAY DON HANG!\n");
+		printOrderHeader();
+		printSingleOrder(foundOrderNode->info);
+	}
+	else {
+		printf("\n\t\t\t\t\t\tKHONG TIM THAY DON DAT HANG!\n");
+	}
+	pause();
+}
+
+static void processSearchCustomerByName(CustomerList* customer_list) {
+	char search_name[100];
+
+	setColor(7);
+	printf("\n\t\t\t\t\t\tNHAP TEN KHACH HANG: ");
+	getchar();
+	fgets(search_name, sizeof(search_name), stdin);
+	search_name[strcspn(search_name, "\n")] = '\0';
+
+	CustomerNode* foundCustomerNode = findCustomerByName(customer_list, search_name);
+	if (foundCustomerNode != NULL) {
+		printf("\n\t\t\t\t\t\tTIM THAY KHACH HANG!\n");
+		printCustomerHeader();
+		printSingleCustomer(foundCustomerNode->info);
+	}
+	else {
+		printf("\n\t\t\t\t\t\tKHONG TIM THAY KHACH HANG!\n");
+	}
+	pause();
+}
+
 // ================= INVENTORY MANAGEMENT =================
 void processInventory(Product inventory[MAXSIZE], int* product_count) {
 	int choice;
@@ -11,9 +70,7 @@ void processInventory(Product inventory[MAXSIZE], int* product_count) {
 	do {
 		system("cls");
 		menuInventory();
-		setColor(10);
-		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
-		scanf("%d", &choice);
+		choice = readMenuChoice();
 
 		switch (choice) {
 			case 1:
@@ -43,14 +100,10 @@ void processInventory(Product inventory[MAXSIZE], int* product_count) {
 				pause();
 				break;
 			case 0:
-				setColor(10);
-				system("cls");
-				printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+				printBackToMainMessage();
 				break;
 			default:
-				setColor(4);
-				system("cls");
-				printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+				printInvalidChoiceMessage();
 				break;
 		}
 	} while (choice != 0);
@@ -63,8 +116,7 @@ void processOrder(OrderQueue* q) {
 	do {
 		system("cls");
 		menuOrder();
-		setColor(10); printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
-		scanf("%d", &choice);
+		choice = readMenuChoice();
 
 		switch (choice) {
 		case 1:
@@ -86,14 +138,10 @@ void processOrder(OrderQueue* q) {
 			break;
 
 		case 0:
-			setColor(10);
-			system("cls");
-			printf("\n\t\t\t\t\t\tTRO VE MAN HINH CHINH\n");
+			printBackToMainMessage();
 			break;
 		default:
-			setColor(4);
-			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+			printInvalidChoiceMessage();
 			break;
 		}
 
@@ -103,54 +151,18 @@ void processOrder(OrderQueue* q) {
 // ============ SEARCH & SORT =================
 void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 	int choice;
-	char search_name[100];
-	OrderNode* foundOrderNode = NULL;
-	CustomerNode* foundCustomerNode = NULL;
 
 	do {
 		system("cls");
 		menuSearchSort();
-		setColor(10); 
-		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
-		scanf("%d", &choice);
+		choice = readMenuChoice();
 
 		switch (choice) {
-		case 1: 
-			setColor(7);
-			printf("\n\t\t\t\t\t\tNHAP MA DON: ");
-			scanf("%d", &search_order_id);
-			getchar();
-
-			foundOrderNode = findOrderById(order_queue, search_order_id);
-
-			if (foundOrderNode != NULL) {
-				printf("\n\t\t\t\t\t\tTIM THAY DON HANG!\n");
-				printOrderHeader();
-				printSingleOrder(foundOrderNode->info);
-			}
-			else {
-				printf("\n\t\t\t\t\t\tKHONG TIM THAY DON DAT HANG!\n");
-			}
-			pause();
+		case 1:
+			processSearchOrderById(order_queue);
 			break;
 		case 2:
-			setColor(7);
-			printf("\n\t\t\t\t\t\tNHAP TEN KHACH HANG: ");
-			getchar();
-			fgets(search_name, sizeof(search_name), stdin);
-			search_name[strcspn(search_name, "\n")] = '\0';
-
-			foundCustomerNode = findCustomerByName(customer_list, search_name);
-
-			if (foundCustomerNode != NULL) {
-				printf("\n\t\t\t\t\t\tTIM THAY KHACH HANG!\n");
-				printCustomerHeader();
-				printSingleCustomer(foundCustomerNode->info);
-			}
-			else {
-				printf("\n\t\t\t\t\t\tKHONG TIM THAY KHACH HANG!\n");
-			}
-			pause();
+			processSearchCustomerByName(customer_list);
 			break;
 		case 3:
 			setColor(7);
@@ -165,14 +177,10 @@ void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 			pause();
 			break;
 		case 0:
-			setColor(10);
-			system("cls");
-			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+			printBackToMainMessage();
 			break;
 		default:
-			setColor(4);
-			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+			printInvalidChoiceMessage();
 			break;
 		}
 
@@ -180,17 +188,14 @@ void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 }
 
 void processCustomer(CustomerList* customer_list) {
-	int choice, count;
+	int choice;
 	do {
 		system("cls");
 		menuCustomer();
-		setColor(10); 
-		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
-		scanf("%d", &choice);
+		choice = readMenuChoice();
 		switch (choice) {
 		case 1:
 			setColor(7);
-			loadCustomerFile(CUSTOMER_FILE, customer_list, &count);
 			displayCustomerList(customer_list);
 			pause();
 			break;
@@ -210,14 +215,10 @@ void processCustomer(CustomerList* customer_list) {
 			pause();
 			break;
 		case 0:
-			setColor(10);
-			system("cls");
-			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+			printBackToMainMessage();
 			break;
 		default:
-			setColor(4);
-			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+			printInvalidChoiceMessage();
 			break;
 		}
 	} while (choice != 0);
@@ -229,23 +230,17 @@ void processStatistics() {
 	do {
 		system("cls");
 		menuStatistics();
-		setColor(10); 
-		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: "); 
-		scanf("%d", &choice);
+		choice = readMenuChoice();
 		switch (choice) {
 		case 1:break;
 		case 2:break;
 		case 3:break;
 		case 4:break;
 		case 0:
-			setColor(10);
-			system("cls");
-			printf("\n\t\t\t\t\t\tDA QUAY LAI MAN HINH CHINH\n");
+			printBackToMainMessage();
 			break;
 		default:
-			setColor(4);
-			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
+			printInvalidChoiceMessage();
 			break;
 		}
 	} while (choice != 0);
