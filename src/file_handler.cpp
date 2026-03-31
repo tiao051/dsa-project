@@ -13,6 +13,7 @@ void loadProductRecord(Product inventory[], FILE* file_ptr) {
 		i++;
 	}
 }
+
 // Load entire inventory file
 void loadInventoryFile(const char* filename, Product inventory[], int* count) {
 	FILE* file_ptr = fopen(filename, "rt");
@@ -24,16 +25,18 @@ void loadInventoryFile(const char* filename, Product inventory[], int* count) {
 	loadProductRecord(inventory, file_ptr);
 	fclose(file_ptr);
 }
+
 // Load a single customer record from file
 void loadCustomerRecord(FILE* file_ptr, Customer* customer_ptr) {
-	fscanf(file_ptr, "%d,%[^,],%[^,],%d,%[^,],%lld\n",
-		&customer_ptr->id,
+	fscanf(file_ptr, "%36[^,],%[^,],%[^,],%d,%[^,],%lld\n",
+		customer_ptr->id,
 		customer_ptr->name,
 		customer_ptr->phone,
 		(int*)&customer_ptr->tier,
 		customer_ptr->status,
 		&customer_ptr->total_spent);
 }
+
 // Load entire customer file
 void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 	FILE* file_ptr = fopen(filename, "rt");
@@ -51,6 +54,44 @@ void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 		customer.total_spent = 0;
 		insertCustomerTail(list, customer);
 		i++;
+	}
+
+	fclose(file_ptr);
+}
+
+// Update customer count at the beginning of file
+void updateCustomerCountInFile(const char* filename) {
+	FILE* file_ptr = fopen(filename, "r+t");
+	if (file_ptr == NULL) {
+		return;
+	}
+
+	// Read current count
+	int count = 0;
+	fscanf(file_ptr, "%d\n", &count);
+
+	// Seek back to beginning and update count
+	fseek(file_ptr, 0, SEEK_SET);
+	fprintf(file_ptr, "%d\n", count + 1);
+
+	fclose(file_ptr);
+}
+
+// Decrease customer count at the beginning of file
+void decreaseCustomerCountInFile(const char* filename) {
+	FILE* file_ptr = fopen(filename, "r+t");
+	if (file_ptr == NULL) {
+		return;
+	}
+
+	// Read current count
+	int count = 0;
+	fscanf(file_ptr, "%d\n", &count);
+
+	// Seek back to beginning and update count
+	fseek(file_ptr, 0, SEEK_SET);
+	if (count > 0) {
+		fprintf(file_ptr, "%d\n", count - 1);
 	}
 
 	fclose(file_ptr);
@@ -74,4 +115,7 @@ void appendCustomerToFile(const char* filename, Customer* customer) {
 		customer->total_spent);
 
 	fclose(file_ptr);
+
+	// Auto update customer count
+	updateCustomerCountInFile(filename);
 }

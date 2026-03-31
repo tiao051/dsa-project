@@ -1,15 +1,30 @@
 ﻿#include "../include/order_manager.h"
-#include "time.h"
 
-// Helper function creating UUID for customer (format: xxxxxxxx-xxxx)
-static void generateUUID(char* uuid) {
-	const char* chars = "0123456789abcdef";
-	srand((unsigned int)time(NULL));
-	for (int i = 0; i < 13; i++) {
-		if (i == 8) uuid[i] = '-';
-		else uuid[i] = chars[rand() % 16];
+// Helper function to convert status to display format
+const char* getDisplayStatus(const char* status) {
+	if (strcmp(status, "HoatDong") == 0) {
+		return "Hoat dong";
 	}
-	uuid[13] = '\0';
+	else if (strcmp(status, "Khoa") == 0) {
+		return "Khoa";
+	}
+	return status;
+}
+
+// Generate next customer ID based on customer count from file
+void generateNextCustomerId(char* id) {
+	FILE* file_ptr = fopen("data/customers.txt", "rt");
+	if (file_ptr == NULL) {
+		sprintf(id, "101");
+		return;
+	}
+
+	int count = 0;
+	fscanf(file_ptr, "%d\n", &count);
+	fclose(file_ptr);
+
+	int nextId = 100 + count + 1;
+	sprintf(id, "%d", nextId);
 }
 
 // Helper function to validate phone number
@@ -54,19 +69,19 @@ void registerNewCustomer(CustomerList* customer_list) {
 	// Set default tier to Normal
 	customer.tier = TIER_NORMAL;
 
-	strcpy(customer.status, "Hoat dong");
+	strcpy(customer.status, "HoatDong");
 
 	initOrderQueue(&customer.history);
 	customer.total_spent = 0;
 
-	// Automatically generate user id
-	generateUUID(customer.id);
+	// Automatically generate next customer id
+	generateNextCustomerId(customer.id);
 
 	if (insertCustomerTail(customer_list, customer)) {
 		printf("\n\t\t\t\t\t\t->THEM KHACH HANG THANH CONG");
 		printf("\n\t\t\t\t\t\tID: %s", customer.id);
 		printf("\n\t\t\t\t\t\tLevel: Khach vang lai (Mac dinh)");
-		printf("\n\t\t\t\t\t\tTrang thai: %s (Mac dinh)", customer.status);
+		printf("\n\t\t\t\t\t\tTrang thai: %s (Mac dinh)", getDisplayStatus(customer.status));
 		appendCustomerToFile("data/customers.txt", &customer);
 	}
 	else {
@@ -76,12 +91,12 @@ void registerNewCustomer(CustomerList* customer_list) {
 
 // Print single customer
 void printSingleCustomer(Customer customer) {
-	printf("\t\t\t| CustID%-4d | %-25s | %-15s | %-8d | %-12s | %12lld |\n",
+	printf("\t\t\t| CustID%-10s | %-25s | %-15s | %-8d | %-12s | %12lld |\n",
 			customer.id,
 			customer.name,
 			customer.phone,
 			customer.tier,
-			customer.status,
+			getDisplayStatus(customer.status),
 			customer.total_spent);
 }
 
