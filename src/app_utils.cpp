@@ -8,7 +8,11 @@ static int readMenuChoice() {
 	int choice;
 	setColor(10);
 	printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: ");
-	scanf("%d", &choice);
+	if (scanf("%d", &choice) != 1) {
+		clearInputBuffer();
+		return -1;
+	}
+	clearInputBuffer();
 	return choice;
 }
 
