@@ -29,7 +29,7 @@ void menuInventory(){
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	printf("\t\t\t\t\t\t|1. Load danh sach kho san pham                       |\t\t\t\t\t\n");
+	printf("\t\t\t\t\t\t|1. Hien thi danh sach kho san pham                   |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. Them san pham                                     |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|3. Nhap them hang                                    |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|4. Cap nhat gia san pham                             |\t\t\t\t\t\n");
@@ -44,7 +44,7 @@ void menuCustomer() {
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 	setColor(8);
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
-	printf("\t\t\t\t\t\t|1. Load danh sach khach hang                         |\t\t\t\t\t\n");
+	printf("\t\t\t\t\t\t|1. Hien thi danh sach khach hang                     |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. Dang ky them thanh vien moi                       |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|3. Nang/ha hang thanh vien                           |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|4. Xoa khach hang                                    |\t\t\t\t\t\n");

@@ -72,6 +72,12 @@ int main() {
 	// Initialize data structures
 	initOrderQueue(&order_queue);
 	initCustomerList(&customer_list);
+
+	// Auto-load data files at startup
+	int customer_count = 0;
+	loadInventoryFile("data/inventory.txt", inventory, &product_count);
+	loadCustomerFile("data/customers.txt", &customer_list, &customer_count);
+
 	startApp();
 	return 0;
 }

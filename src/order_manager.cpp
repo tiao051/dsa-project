@@ -142,8 +142,10 @@ void insertOrderManual(OrderQueue* q) {
 
 // Print single order
 void printSingleOrder(Order order) {
-	printf("\t\t| Order%-10d | %-25s | %-25s | %-12d | %-10s | %8lld |\n",
-		order.id,
+	char ma_don[24];
+	sprintf(ma_don, "Order%d", order.id);
+	printf("\t\t| %-16s | %-25s | %-25s | %-12d | %-10s | %8lld |\n",
+		ma_don,
 		order.customer_name,
 		order.product_name,
 		order.quantity,
