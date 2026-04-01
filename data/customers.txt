@@ -1,4 +1,4 @@
-639
+640
 101,KhachHang001,0992927308,0,Khoa,0
 102,KhachHang002,0910603509,0,Khoa,0
 103,KhachHang003,0937804503,0,Khoa,0
@@ -638,3 +638,4 @@
 151,minh tho,0906756712,0,Hoat dong,0
 152,nmt,0907561234,0,HoatDong,0
 153,tho,0901235442,0,HoatDong,0
+740,test,0906552341,0,HoatDong,0

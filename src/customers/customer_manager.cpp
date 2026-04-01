@@ -128,7 +128,6 @@ static void saveCurrentCustomerList(CustomerList* customer_list) {
 void registerNewCustomer(CustomerList* customer_list) {
 	Customer customer;
 
-	clearInputBuffer();
 	readValidCustomerName(customer_list, customer.name, sizeof(customer.name));
 	readValidCustomerPhone(customer.phone, sizeof(customer.phone));
 
@@ -331,7 +330,6 @@ void deleteCustomer(CustomerList* customer_list) {
 	}
 
 	char name[100];
-	clearInputBuffer();
 
 	printf("\n\t\t\t\t\t\tNhap ten khach hang can xoa: ");
 	fgets(name, sizeof(name), stdin);
