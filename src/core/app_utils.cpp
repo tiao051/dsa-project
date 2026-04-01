@@ -4,16 +4,25 @@ int search_order_id;
 const char* INVENTORY_FILE = "data/inventory.txt";
 const char* CUSTOMER_FILE = "data/customers.txt";
 
-static int readMenuChoice() {
+static int readMenuChoiceInRange(int min_choice, int max_choice) {
 	int choice;
-	setColor(10);
-	printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: ");
-	if (scanf("%d", &choice) != 1) {
+	while (1) {
+		setColor(10);
+		printf("\n\t\t\t\t\t\t->LUA CHON CHUC NANG: ");
+
+		if (scanf("%d", &choice) != 1) {
+			clearInputBuffer();
+			showErrorMessage("[!] Loi nhap lieu! Vui long nhap so.");
+			continue;
+		}
+
 		clearInputBuffer();
-		return -1;
+		if (choice >= min_choice && choice <= max_choice) {
+			return choice;
+		}
+
+		showErrorMessage("[!] Lua chon khong hop le! Vui long nhap lai.");
 	}
-	clearInputBuffer();
-	return choice;
 }
 
 static void printBackToMainMessage() {
@@ -74,7 +83,7 @@ void processInventory(Product inventory[MAXSIZE], int* product_count) {
 	do {
 		system("cls");
 		menuInventory();
-		choice = readMenuChoice();
+		choice = readMenuChoiceInRange(0, 5);
 
 		switch (choice) {
 			case 1:
@@ -106,9 +115,6 @@ void processInventory(Product inventory[MAXSIZE], int* product_count) {
 			case 0:
 				printBackToMainMessage();
 				break;
-			default:
-				printInvalidChoiceMessage();
-				break;
 		}
 	} while (choice != 0);
 }
@@ -119,7 +125,7 @@ void processOrder(OrderQueue* q) {
 	do {
 		system("cls");
 		menuOrder();
-		choice = readMenuChoice();
+		choice = readMenuChoiceInRange(0, 3);
 
 		switch (choice) {
 		case 1:
@@ -143,9 +149,6 @@ void processOrder(OrderQueue* q) {
 		case 0:
 			printBackToMainMessage();
 			break;
-		default:
-			printInvalidChoiceMessage();
-			break;
 		}
 
 	} while (choice != 0);
@@ -158,7 +161,7 @@ void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 	do {
 		system("cls");
 		menuSearchSort();
-		choice = readMenuChoice();
+		choice = readMenuChoiceInRange(0, 4);
 
 		switch (choice) {
 		case 1:
@@ -182,9 +185,6 @@ void processSearchSort(OrderQueue* order_queue, CustomerList* customer_list) {
 		case 0:
 			printBackToMainMessage();
 			break;
-		default:
-			printInvalidChoiceMessage();
-			break;
 		}
 
 	} while (choice != 0);
@@ -195,7 +195,7 @@ void processCustomer(CustomerList* customer_list) {
 	do {
 		system("cls");
 		menuCustomer();
-		choice = readMenuChoice();
+		choice = readMenuChoiceInRange(0, 4);
 		switch (choice) {
 		case 1:
 			setColor(7);
@@ -220,9 +220,6 @@ void processCustomer(CustomerList* customer_list) {
 		case 0:
 			printBackToMainMessage();
 			break;
-		default:
-			printInvalidChoiceMessage();
-			break;
 		}
 	} while (choice != 0);
 	system("cls");
@@ -233,7 +230,7 @@ void processStatistics() {
 	do {
 		system("cls");
 		menuStatistics();
-		choice = readMenuChoice();
+		choice = readMenuChoiceInRange(0, 4);
 		switch (choice) {
 		case 1:break;
 		case 2:break;
@@ -241,9 +238,6 @@ void processStatistics() {
 		case 4:break;
 		case 0:
 			printBackToMainMessage();
-			break;
-		default:
-			printInvalidChoiceMessage();
 			break;
 		}
 	} while (choice != 0);

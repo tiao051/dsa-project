@@ -38,22 +38,18 @@ static int getReservedQuantityInQueue(OrderQueue* q, const char* product_name) {
 	return reserved;
 }
 
-static int readOrderId(OrderQueue* q, int* out_order_id) {
-	printf("\n\t\t\t\t\t\tNhap Ma Don: ");
-	if (scanf("%d", out_order_id) != 1 || *out_order_id <= 0) {
-		clearInputBuffer();
-		showErrorMessage("[!] Ma don khong hop le!");
-		return 0;
+static int generateNextOrderId(OrderQueue* q) {
+	int max_id = 100;
+	OrderNode* node = q->head;
+
+	while (node != NULL) {
+		if (node->info.id > max_id) {
+			max_id = node->info.id;
+		}
+		node = node->next;
 	}
 
-	if (findOrderById(q, *out_order_id) != NULL) {
-		clearInputBuffer();
-		showErrorMessage("[!] Ma don da ton tai trong hang doi!");
-		return 0;
-	}
-
-	clearInputBuffer();
-	return 1;
+	return max_id + 1;
 }
 
 static int readTrimmedLine(const char* prompt, char* output, size_t output_size, const char* empty_message) {
@@ -154,23 +150,42 @@ void insertOrderManual(OrderQueue* q) {
 	int product_index = -1;
 	PriorityLevel tier_priority;
 
-	if (!readOrderId(q, &order.id)) return;
+	order.id = generateNextOrderId(q);
+	printf("\n\t\t\t\t\t\tMa don duoc tao tu dong: %d", order.id);
 
-	if (!readTrimmedLine("Nhap Ten Khach Hang: ", order.customer_name, sizeof(order.customer_name),
-		"[!] Ten khach hang khong duoc de trong!")) return;
+	while (1) {
+		if (!readTrimmedLine("Nhap Ten Khach Hang: ", order.customer_name, sizeof(order.customer_name),
+			"[!] Ten khach hang khong duoc de trong!")) {
+			continue;
+		}
 
-	if (!resolveOrderCustomer(order.customer_name, &customer_node, &tier_priority)) return;
+		if (resolveOrderCustomer(order.customer_name, &customer_node, &tier_priority)) {
+			break;
+		}
+	}
 
-	if (!readTrimmedLine("Nhap Ten San Pham: ", order.product_name, sizeof(order.product_name),
-		"[!] Ten san pham khong duoc de trong!")) return;
+	while (1) {
+		if (!readTrimmedLine("Nhap Ten San Pham: ", order.product_name, sizeof(order.product_name),
+			"[!] Ten san pham khong duoc de trong!")) {
+			continue;
+		}
 
-	if (!resolveOrderProduct(order.product_name, &product_index)) return;
+		if (resolveOrderProduct(order.product_name, &product_index)) {
+			break;
+		}
+	}
 
-	if (!readOrderQuantity(&order.quantity)) return;
+	while (1) {
+		if (!readOrderQuantity(&order.quantity)) {
+			continue;
+		}
 
-	if (!validateAvailableStock(q, product_index, order.quantity)) return;
+		if (validateAvailableStock(q, product_index, order.quantity)) {
+			break;
+		}
+	}
 
-	if (!readShippingMethod(&order.shipping_method)) return;
+	while (!readShippingMethod(&order.shipping_method)) {}
 
 	order.priority = tier_priority;
 	if (order.shipping_method == SHIPPING_EXPRESS) {

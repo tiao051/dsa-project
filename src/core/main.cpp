@@ -7,12 +7,33 @@ Product inventory[MAXSIZE];
 int product_count = 0;
 
 int menu_choice;
+
+static int readMainMenuChoice() {
+	int choice;
+	while (1) {
+		setColor(10);
+		printf("\n\t\t\t\t\t\t->VUI LONG CHON CHUC NANG: ");
+
+		if (scanf("%d", &choice) != 1) {
+			clearInputBuffer();
+			showErrorMessage("[!] Loi nhap lieu! Vui long nhap so.");
+			continue;
+		}
+
+		clearInputBuffer();
+		if (choice >= 0 && choice <= 5) {
+			return choice;
+		}
+
+		showErrorMessage("[!] Lua chon khong hop le! Vui long nhap lai.");
+	}
+}
+
 void startApp() {
 
 	do {
 		showMainMenu();
-		setColor(10);
-		printf("\n\t\t\t\t\t\t->VUI LONG CHON CHUC NANG: "); scanf("%d", &menu_choice);
+		menu_choice = readMainMenuChoice();
 		switch (menu_choice) {
 		case 1:
 			processInventory(inventory, &product_count);
@@ -59,9 +80,9 @@ void startApp() {
 			pause();
 			break;
 		default:
-			setColor(4); 
+			setColor(4);
 			system("cls");
-			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n"); 
+			printf("\n\t\t\t\t\tBAN DANG VUOT MUC CHUC NANG LUA CHON, VUI LONG LUA CHON CHUC NANG TREN\n");
 			break;
 		}
 	} while (menu_choice != 0);
