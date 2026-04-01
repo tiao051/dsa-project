@@ -11,6 +11,7 @@
 #include <time.h>
 
 #define MAXSIZE 100
+#define PACKING_STATION_COUNT 3
 
 // Enums 
 
@@ -19,6 +20,11 @@ typedef enum {
     PRIORITY_VIP     = 1,
     PRIORITY_EXPRESS = 2
 } PriorityLevel;
+
+typedef enum {
+    SHIPPING_STANDARD = 0,
+    SHIPPING_EXPRESS  = 1
+} ShippingMethod;
 
 typedef enum {
     TIER_NORMAL  = 0,
@@ -48,6 +54,8 @@ typedef struct Order {
     int quantity;
     AmountType price;
     PriorityLevel priority;
+    ShippingMethod shipping_method;
+    NameType status;
 } Order;
 
 typedef struct OrderNode {
@@ -119,6 +127,7 @@ void trimString(char* str);
 int enqueueOrder(OrderQueue* q, Order x);
 int dequeueOrder(OrderQueue* q, Order* out_order);
 void insertOrderManual(OrderQueue* q); 
+void processParallelPackaging(OrderQueue* q);
 
 // Core Operations - Customer List
 int insertCustomerTail(CustomerList* l, Customer x);
@@ -178,6 +187,7 @@ void setColor(int color_code);
 void pause();
 void clearInputBuffer();
 void showErrorMessage(const char* message);
+char readYesNoChoice(const char* prompt);
 
 // Secondary Process Functions
 void processStatistics();

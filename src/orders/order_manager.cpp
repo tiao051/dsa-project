@@ -6,6 +6,11 @@ static const char* getPriorityText(PriorityLevel priority) {
 	return "Thuong";
 }
 
+static const char* getShippingMethodText(ShippingMethod method) {
+	if (method == SHIPPING_EXPRESS) return "Hoa toc";
+	return "Tieu chuan";
+}
+
 static PriorityLevel mapTierToPriority(CustomerTier tier) {
 	if (tier == TIER_EXPRESS) return PRIORITY_EXPRESS;
 	if (tier == TIER_VIP) return PRIORITY_VIP;
@@ -112,10 +117,34 @@ static int validateAvailableStock(OrderQueue* q, int product_index, int order_qu
 	if (available_stock < order_quantity) {
 		setColor(4);
 		printf("\n\t\t\t\t\t\tTU CHOI: SAN PHAM CHI CON %d CHUA DUOC DAT", available_stock > 0 ? available_stock : 0);
+		printf("\n\t\t\t\t\t\tGOI Y: Vui long giam so luong hoac chon san pham khac.");
 		setColor(7);
 		return 0;
 	}
 	return 1;
+}
+
+static int readShippingMethod(ShippingMethod* out_shipping_method) {
+	int shipping_choice;
+	printf("\n\t\t\t\t\t\tChon phuong thuc van chuyen (1. Hoa toc | 2. Tieu chuan): ");
+	if (scanf("%d", &shipping_choice) != 1) {
+		clearInputBuffer();
+		showErrorMessage("[!] Phuong thuc van chuyen khong hop le!");
+		return 0;
+	}
+	clearInputBuffer();
+
+	if (shipping_choice == 1) {
+		*out_shipping_method = SHIPPING_EXPRESS;
+		return 1;
+	}
+	if (shipping_choice == 2) {
+		*out_shipping_method = SHIPPING_STANDARD;
+		return 1;
+	}
+
+	showErrorMessage("[!] Chi duoc chon 1 hoac 2!");
+	return 0;
 }
 
 // Create and input a new order with stock validation
@@ -123,13 +152,14 @@ void insertOrderManual(OrderQueue* q) {
 	Order order;
 	CustomerNode* customer_node = NULL;
 	int product_index = -1;
+	PriorityLevel tier_priority;
 
 	if (!readOrderId(q, &order.id)) return;
 
 	if (!readTrimmedLine("Nhap Ten Khach Hang: ", order.customer_name, sizeof(order.customer_name),
 		"[!] Ten khach hang khong duoc de trong!")) return;
 
-	if (!resolveOrderCustomer(order.customer_name, &customer_node, &order.priority)) return;
+	if (!resolveOrderCustomer(order.customer_name, &customer_node, &tier_priority)) return;
 
 	if (!readTrimmedLine("Nhap Ten San Pham: ", order.product_name, sizeof(order.product_name),
 		"[!] Ten san pham khong duoc de trong!")) return;
@@ -140,9 +170,19 @@ void insertOrderManual(OrderQueue* q) {
 
 	if (!validateAvailableStock(q, product_index, order.quantity)) return;
 
-	order.price = inventory[product_index].price;
+	if (!readShippingMethod(&order.shipping_method)) return;
 
-	printf("\n\t\t\t\t\t\tUu tien don (theo hang KH): %s", getPriorityText(order.priority));
+	order.priority = tier_priority;
+	if (order.shipping_method == SHIPPING_EXPRESS) {
+		order.priority = PRIORITY_EXPRESS;
+	}
+
+	order.price = inventory[product_index].price;
+	strcpy(order.status, "Cho dong goi");
+
+	printf("\n\t\t\t\t\t\tVan chuyen: %s", getShippingMethodText(order.shipping_method));
+	printf("\n\t\t\t\t\t\tUu tien don: %s", getPriorityText(order.priority));
+	printf("\n\t\t\t\t\t\tTrang thai: %s", order.status);
 	printf("\n\t\t\t\t\t\tDon gia ap dung: %lld", order.price);
 
 	if (enqueueOrder(q, order)) {
@@ -155,18 +195,20 @@ void insertOrderManual(OrderQueue* q) {
 void printSingleOrder(Order order) {
 	char ma_don[24];
 	sprintf(ma_don, "Order%d", order.id);
-	printf("\t\t| %-16s | %-25s | %-25s | %-12d | %-10s | %8lld |\n",
+	printf("\t| %-16s | %-20s | %-20s | %-8d | %-10s | %-10s | %-18s | %10lld |\n",
 		ma_don,
 		order.customer_name,
 		order.product_name,
 		order.quantity,
+		getShippingMethodText(order.shipping_method),
 		getPriorityText(order.priority),
+		order.status,
 		order.price);
 }
 
 // Display all orders in queue
 void displayOrderQueue(OrderQueue* q) {
-	printf("\t\t------------------------------------------------DANH SACH DON HANG-------------------------------------------------\n");
+	printf("\t\t----------------------------------------------- DANH SACH DON HANG -----------------------------------------------\n");
 	printOrderHeader();
 	OrderNode* node = q->head;
 	while(node != NULL)
@@ -175,4 +217,45 @@ void displayOrderQueue(OrderQueue* q) {
 		node = node->next;
 	}
 	printf("\t\t-------------------------------------------------------------------------------------------------------------------\n");
+}
+
+void processParallelPackaging(OrderQueue* q) {
+	int station_count = PACKING_STATION_COUNT;
+	int processed_count = 0;
+	long long total_revenue = 0;
+
+	if (isOrderQueueEmpty(q)) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\tKhong co don nao trong hang doi!");
+		setColor(7);
+		return;
+	}
+
+	if (station_count <= 0) {
+		showErrorMessage("[!] Cau hinh PACKING_STATION_COUNT khong hop le!");
+		return;
+	}
+
+	printf("\n\t\t\t\t\t\tSo tram dong goi cau hinh san: %d", station_count);
+
+	int round = 1;
+	while (!isOrderQueueEmpty(q)) {
+		printf("\n\n\t\t\t\t\t\t--- Dot dong goi %d ---", round);
+		for (int station = 1; station <= station_count && !isOrderQueueEmpty(q); station++) {
+			Order processed_order;
+			printf("\n\t\t\t\t\t\t[Tram %d] Dang nhan don uu tien cao nhat...", station);
+			if (dequeueOrder(q, &processed_order)) {
+				long long revenue = processed_order.price * (long long)processed_order.quantity;
+				total_revenue += revenue;
+				processed_count++;
+			}
+		}
+		round++;
+	}
+
+	setColor(2);
+	printf("\n\n\t\t\t\t\t\tHOAN TAT DONG GOI!");
+	printf("\n\t\t\t\t\t\tTong so don da giao cho DVVC: %d", processed_count);
+	printf("\n\t\t\t\t\t\tTong doanh thu ghi nhan: %lld", total_revenue);
+	setColor(7);
 }

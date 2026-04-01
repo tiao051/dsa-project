@@ -50,7 +50,7 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 		if (inventory[*nSP].stock_quantity <= 0) {
 			setColor(4); printf("\t\t\t\t\t\t[!] So luong phai lon hon 0!\n"); setColor(7);
 		}
-		else if (inventory[*nSP].stock_quantity > 1000) { // Gi? s? gi?i h?n là 1000 don v?
+		else if (inventory[*nSP].stock_quantity > 1000) { // Gi? s? gi?i h?n lï¿½ 1000 don v?
 			setColor(4); printf("\t\t\t\t\t\t[!] So luong qua lon (Toi da 1000)!\n"); setColor(7);
 			inventory[*nSP].stock_quantity = 0; // Trigger re-entry
 		}
@@ -227,13 +227,7 @@ void deleteProduct(Product inventory[MAXSIZE], int* product_count) {
 	else {
 		// Display product to confirm deletion
 		printf("\n\t\t\t\t\t\tSAN PHAM CAN XOA: %s", inventory[find].name);
-		printf("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
-		
-		// Clear buffer before reading character
-		int c;
-		while ((c = getchar()) != '\n' && c != EOF);
-		
-		scanf("%c", &confirm);
+		confirm = readYesNoChoice("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
 
 		if (confirm != 'Y' && confirm != 'y') {
 			printf("\n\t\t\t\t\t\tHUY BO XOA SAN PHAM!");

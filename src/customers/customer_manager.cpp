@@ -276,8 +276,9 @@ void adjustCustomerTierManual(CustomerList* customer_list) {
 		char confirm;
 
 		printf("\n\t\t\t\t\t\tDe nang len hang %s can tong tien tieu la %lld", getTierName(target_tier), min_spent);
-		printf("\n\t\t\t\t\t\tVan muon nang %s len hang %s? (Y/N): ", customer->name, getTierName(target_tier));
-		scanf(" %c", &confirm);
+		char prompt[180];
+		sprintf(prompt, "\n\t\t\t\t\t\tVan muon nang %s len hang %s? (Y/N): ", customer->name, getTierName(target_tier));
+		confirm = readYesNoChoice(prompt);
 
 		if (confirm == 'Y' || confirm == 'y') {
 			customer->tier = target_tier;
@@ -302,8 +303,9 @@ void adjustCustomerTierManual(CustomerList* customer_list) {
 
 		CustomerTier target_tier = (CustomerTier)(customer->tier - 1);
 		char confirm;
-		printf("\n\t\t\t\t\t\tBan co chac chan muon ha hang khach hang %s xuong hang %s? (Y/N): ", customer->name, getTierName(target_tier));
-		scanf(" %c", &confirm);
+		char prompt[220];
+		sprintf(prompt, "\n\t\t\t\t\t\tBan co chac chan muon ha hang khach hang %s xuong hang %s? (Y/N): ", customer->name, getTierName(target_tier));
+		confirm = readYesNoChoice(prompt);
 
 		if (confirm == 'Y' || confirm == 'y') {
 			customer->tier = target_tier;
@@ -343,11 +345,8 @@ void deleteCustomer(CustomerList* customer_list) {
 	while (node != NULL) {
 		if (strcmp(node->info.name, name) == 0) {
 			printf("\n\t\t\t\t\t\tKHACH HANG CAN XOA: %s", node->info.name);
-			printf("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
-
 			char confirm;
-			scanf(" %c", &confirm);
-			clearInputBuffer();
+			confirm = readYesNoChoice("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
 
 			if (confirm == 'Y' || confirm == 'y') {
 				// Remove from list

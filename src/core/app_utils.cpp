@@ -116,7 +116,6 @@ void processInventory(Product inventory[MAXSIZE], int* product_count) {
 // ================= ORDER MANAGEMENT =================
 void processOrder(OrderQueue* q) {
 	int choice;
-	Order out_order;
 	do {
 		system("cls");
 		menuOrder();
@@ -131,7 +130,7 @@ void processOrder(OrderQueue* q) {
 
 		case 2:
 			setColor(7);
-			dequeueOrder(q, &out_order);
+			processParallelPackaging(q);
 			pause();
 			break;
 
