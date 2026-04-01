@@ -124,6 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\order_manager.h" />
+    <ClInclude Include="include\station_simulator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\advanced_features.cpp" />
@@ -136,6 +137,7 @@
     <ClCompile Include="src\inventory\inventory_manager.cpp" />
     <ClCompile Include="src\orders\order_manager.cpp" />
     <ClCompile Include="src\orders\order_queue.cpp" />
+    <ClCompile Include="src\orders\station_simulator.cpp" />
     <ClCompile Include="src\search\search_sort.cpp" />
     <ClCompile Include="src\ui\menu.cpp" />
     <ClCompile Include="src\ui\ui_header.cpp" />

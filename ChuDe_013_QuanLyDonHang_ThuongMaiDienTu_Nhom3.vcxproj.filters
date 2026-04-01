@@ -39,6 +39,9 @@
     <ClInclude Include="include\order_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\station_simulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\advanced_features.cpp">
@@ -69,6 +72,9 @@
       <Filter>Source Files\Orders</Filter>
     </ClCompile>
     <ClCompile Include="src\orders\order_queue.cpp">
+      <Filter>Source Files\Orders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\orders\station_simulator.cpp">
       <Filter>Source Files\Orders</Filter>
     </ClCompile>
     <ClCompile Include="src\search\search_sort.cpp">

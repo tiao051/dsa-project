@@ -638,4 +638,4 @@
 151,minh tho,0906756712,0,Hoat dong,0
 152,nmt,0907561234,0,HoatDong,0
 153,tho,0901235442,0,HoatDong,0
-740,test,0906552341,0,HoatDong,120
+740,test,0906552341,0,HoatDong,230

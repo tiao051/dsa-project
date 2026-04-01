@@ -76,6 +76,151 @@ static void clearCustomerList(CustomerList* list) {
 	list->tail = NULL;
 }
 
+static void clearOrderQueueNodes(OrderQueue* q) {
+	if (q == NULL) return;
+
+	OrderNode* node = q->head;
+	while (node != NULL) {
+		OrderNode* next = node->next;
+		delete node;
+		node = next;
+	}
+
+	q->head = NULL;
+	q->tail = NULL;
+}
+
+void saveOrderQueueToFile(const char* filename, OrderQueue* q) {
+	if (q == NULL) return;
+
+	FILE* file_ptr = fopen(filename, "wt");
+	if (file_ptr == NULL) {
+		printf("\n\t\t\t\t\t\tKhong the luu file %s", filename);
+		return;
+	}
+
+	int count = 0;
+	for (OrderNode* node = q->head; node != NULL; node = node->next) {
+		count++;
+	}
+
+	fprintf(file_ptr, "%d\n", count);
+	for (OrderNode* node = q->head; node != NULL; node = node->next) {
+		Order* order = &node->info;
+		fprintf(file_ptr, "%d,%s,%s,%d,%lld,%d,%d,%s\n",
+			order->id,
+			order->customer_name,
+			order->product_name,
+			order->quantity,
+			order->price,
+			(int)order->priority,
+			(int)order->shipping_method,
+			order->status);
+	}
+
+	fclose(file_ptr);
+}
+
+void appendOrderToFile(const char* filename, Order* order) {
+	if (order == NULL) return;
+
+	FILE* file_ptr = fopen(filename, "rt");
+	if (file_ptr == NULL) {
+		file_ptr = fopen(filename, "wt");
+		if (file_ptr == NULL) {
+			printf("\n\t\t\t\t\t\tKhong the tao file %s", filename);
+			return;
+		}
+		fprintf(file_ptr, "0\n");
+		fclose(file_ptr);
+	}
+	else {
+		fclose(file_ptr);
+	}
+
+	file_ptr = fopen(filename, "a+t");
+	if (file_ptr == NULL) {
+		printf("\n\t\t\t\t\t\tKhong the luu don hang vao file %s", filename);
+		return;
+	}
+
+	fprintf(file_ptr, "%d,%s,%s,%d,%lld,%d,%d,%s\n",
+		order->id,
+		order->customer_name,
+		order->product_name,
+		order->quantity,
+		order->price,
+		(int)order->priority,
+		(int)order->shipping_method,
+		order->status);
+	fclose(file_ptr);
+
+	file_ptr = fopen(filename, "r+t");
+	if (file_ptr == NULL) return;
+
+	int count = 0;
+	fscanf(file_ptr, "%d\n", &count);
+	fseek(file_ptr, 0, SEEK_SET);
+	fprintf(file_ptr, "%d\n", count + 1);
+	fclose(file_ptr);
+}
+
+void loadOrderFile(const char* filename, OrderQueue* q) {
+	if (q == NULL) return;
+
+	FILE* file_ptr = fopen(filename, "rt");
+	if (file_ptr == NULL) {
+		file_ptr = fopen(filename, "wt");
+		if (file_ptr != NULL) {
+			fprintf(file_ptr, "0\n");
+			fclose(file_ptr);
+		}
+		return;
+	}
+
+	clearOrderQueueNodes(q);
+
+	int count = 0;
+	if (fscanf(file_ptr, "%d\n", &count) != 1 || count <= 0) {
+		fclose(file_ptr);
+		return;
+	}
+
+	char line[512];
+	while (fgets(line, sizeof(line), file_ptr) != NULL) {
+		Order order;
+		int priority = 0;
+		int shipping_method = 0;
+
+		int parsed = sscanf(line, "%d,%99[^,],%99[^,],%d,%lld,%d,%d,%99[^\n]",
+			&order.id,
+			order.customer_name,
+			order.product_name,
+			&order.quantity,
+			&order.price,
+			&priority,
+			&shipping_method,
+			order.status);
+
+		if (parsed != 8) {
+			continue;
+		}
+
+		order.priority = (PriorityLevel)priority;
+		order.shipping_method = (ShippingMethod)shipping_method;
+		trimString(order.customer_name);
+		trimString(order.product_name);
+		trimString(order.status);
+
+		if (_stricmp(order.status, "Hoan thanh") == 0 || _stricmp(order.status, "Da giao cho DVVC") == 0) {
+			continue;
+		}
+		enqueueOrder(q, order);
+	}
+
+	fclose(file_ptr);
+}
+
 // Load entire customer file
 void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 	FILE* file_ptr = fopen(filename, "rt");

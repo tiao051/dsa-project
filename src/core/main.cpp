@@ -98,6 +98,7 @@ int main() {
 	int customer_count = 0;
 	loadInventoryFile("data/inventory.txt", inventory, &product_count);
 	loadCustomerFile("data/customers.txt", &customer_list, &customer_count);
+	loadOrderFile("data/orders.txt", &order_queue);
 
 	startApp();
 	return 0;

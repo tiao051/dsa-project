@@ -180,7 +180,7 @@ void displayCustomerList(CustomerList* customer_list) {
 }
 
 // Auto-upgrade customer tier
-void autoUpgradeCustomerTier(CustomerList* customer_list) {
+void autoUpgradeCustomerTier(CustomerList* customer_list, int show_log) {
 	int count = 0;
 	CustomerNode* node = customer_list->head;
 	
@@ -210,9 +210,11 @@ void autoUpgradeCustomerTier(CustomerList* customer_list) {
 
 	// Save updated customer list to file
 	saveCustomerFile("data/customers.txt", customer_list, count);
-	setColor(2);
-	printf("\n\t\t\t\t\t\tDA CAP NHAT HANG THANH VIEN!");
-	setColor(7);
+	if (show_log) {
+		setColor(2);
+		printf("\n\t\t\t\t\t\tDA CAP NHAT HANG THANH VIEN!");
+		setColor(7);
+	}
 }
 
 void adjustCustomerTierManual(CustomerList* customer_list) {

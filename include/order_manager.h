@@ -112,9 +112,12 @@ void loadProductRecord(Product inv[], FILE* file_ptr, int count);
 void loadInventoryFile(const char* filename, Product inv[], int* count);
 void loadCustomerRecord(FILE* file_ptr, Customer* customer_ptr);
 void loadCustomerFile(const char* filename, CustomerList* list, int* count);
+void loadOrderFile(const char* filename, OrderQueue* q);
 void appendCustomerToFile(const char* filename, Customer* customer);
 void appendProductToFile(const char* filename, Product* product);
+void appendOrderToFile(const char* filename, Order* order);
 void saveInventoryToFile(const char* filename, Product inventory[], int count);
+void saveOrderQueueToFile(const char* filename, OrderQueue* q);
 void updateCustomerCountInFile(const char* filename);
 void decreaseCustomerCountInFile(const char* filename);
 void updateProductCountInFile(const char* filename);
@@ -126,13 +129,17 @@ void trimString(char* str);
 // Core Operations - Order Queue
 int enqueueOrder(OrderQueue* q, Order x);
 int dequeueOrder(OrderQueue* q, Order* out_order);
+int getOrderPriorityRank(const Order* order);
+void processCompletedOrder(const Order* order);
+void resetCompletedOrderHistory();
+void saveOrderQueueWithHistory(const char* filename, OrderQueue* pending_queue);
 void insertOrderManual(OrderQueue* q); 
 void processParallelPackaging(OrderQueue* q);
 
 // Core Operations - Customer List
 int insertCustomerTail(CustomerList* l, Customer x);
 void registerNewCustomer(CustomerList* l);
-void autoUpgradeCustomerTier(CustomerList* l);
+void autoUpgradeCustomerTier(CustomerList* l, int show_log);
 void adjustCustomerTierManual(CustomerList* l);
 
 // Validation helpers

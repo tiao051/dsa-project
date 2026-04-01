@@ -1,5 +1,49 @@
 #include "../../include/order_manager.h"
 
+static OrderQueue completed_history_queue;
+static int completed_history_initialized = 0;
+
+static void ensureCompletedHistoryInitialized() {
+	if (completed_history_initialized == 0) {
+		initOrderQueue(&completed_history_queue);
+		completed_history_initialized = 1;
+	}
+}
+
+static void clearOrderNodes(OrderQueue* q) {
+	if (q == NULL) return;
+
+	OrderNode* node = q->head;
+	while (node != NULL) {
+		OrderNode* next = node->next;
+		delete node;
+		node = next;
+	}
+
+	q->head = NULL;
+	q->tail = NULL;
+}
+
+static void appendOrderTail(OrderQueue* q, const Order* order) {
+	if (q == NULL || order == NULL) return;
+
+	OrderNode* node = createOrderNode(*order);
+	if (node == NULL) return;
+
+	if (q->head == NULL) {
+		q->head = q->tail = node;
+		return;
+	}
+
+	q->tail->next = node;
+	q->tail = node;
+}
+
+void resetCompletedOrderHistory() {
+	ensureCompletedHistoryInitialized();
+	clearOrderNodes(&completed_history_queue);
+}
+
 static void updateCustomerRevenue(const Order* order) {
 	if (order == NULL) return;
 
@@ -8,19 +52,90 @@ static void updateCustomerRevenue(const Order* order) {
 
 	long long order_revenue = order->price * (long long)order->quantity;
 	customer_node->info.total_spent += order_revenue;
-	autoUpgradeCustomerTier(&customer_list);
+	autoUpgradeCustomerTier(&customer_list, 0);
+}
+
+int getOrderPriorityRank(const Order* order) {
+	if (order == NULL) return 3;
+
+	if (order->priority == PRIORITY_EXPRESS) return 1;
+	if (order->priority == PRIORITY_VIP) return 2;
+	return 3;
 }
 
 static int compareOrderPriority(const Order* lhs, const Order* rhs) {
-	if (lhs->shipping_method != rhs->shipping_method) {
-		return lhs->shipping_method == SHIPPING_EXPRESS ? 1 : -1;
-	}
-
-	if (lhs->priority != rhs->priority) {
-		return lhs->priority > rhs->priority ? 1 : -1;
+	int lhs_rank = getOrderPriorityRank(lhs);
+	int rhs_rank = getOrderPriorityRank(rhs);
+	if (lhs_rank != rhs_rank) {
+		return lhs_rank < rhs_rank ? 1 : -1;
 	}
 
 	return 0;
+}
+
+void processCompletedOrder(const Order* order) {
+	if (order == NULL) return;
+	ensureCompletedHistoryInitialized();
+
+	for (int i = 0; i < product_count; i++) {
+		if (_stricmp(inventory[i].name, order->product_name) == 0) {
+			inventory[i].stock_quantity -= order->quantity;
+			inventory[i].sold_quantity += order->quantity;
+			break;
+		}
+	}
+
+	saveInventoryToFile("data/inventory.txt", inventory, product_count);
+	updateCustomerRevenue(order);
+
+	Order completed_order = *order;
+	strcpy(completed_order.status, "Hoan thanh");
+	appendOrderTail(&completed_history_queue, &completed_order);
+}
+
+void saveOrderQueueWithHistory(const char* filename, OrderQueue* pending_queue) {
+	if (filename == NULL || pending_queue == NULL) return;
+	ensureCompletedHistoryInitialized();
+
+	FILE* file_ptr = fopen(filename, "wt");
+	if (file_ptr == NULL) {
+		printf("\n\t\t\t\t\t\tKhong the luu file %s", filename);
+		return;
+	}
+
+	int total_count = 0;
+	for (OrderNode* node = pending_queue->head; node != NULL; node = node->next) total_count++;
+	for (OrderNode* node = completed_history_queue.head; node != NULL; node = node->next) total_count++;
+
+	fprintf(file_ptr, "%d\n", total_count);
+
+	for (OrderNode* node = pending_queue->head; node != NULL; node = node->next) {
+		Order* order = &node->info;
+		fprintf(file_ptr, "%d,%s,%s,%d,%lld,%d,%d,%s\n",
+			order->id,
+			order->customer_name,
+			order->product_name,
+			order->quantity,
+			order->price,
+			(int)order->priority,
+			(int)order->shipping_method,
+			order->status);
+	}
+
+	for (OrderNode* node = completed_history_queue.head; node != NULL; node = node->next) {
+		Order* order = &node->info;
+		fprintf(file_ptr, "%d,%s,%s,%d,%lld,%d,%d,%s\n",
+			order->id,
+			order->customer_name,
+			order->product_name,
+			order->quantity,
+			order->price,
+			(int)order->priority,
+			(int)order->shipping_method,
+			order->status);
+	}
+
+	fclose(file_ptr);
 }
 
 OrderNode* createOrderNode(Order x) {
@@ -90,20 +205,11 @@ int dequeueOrder(OrderQueue* q, Order* out_order) {
 	printf("\n\t\t\t\t\t\tXU LY DON HANG: %d - %s", processed_order.id, processed_order.customer_name);
 	printf("\n\t\t\t\t\t\tTrang thai: %s", processed_order.status);
 	printf("\n\t\t\t\t\t\tDoanh thu ghi nhan: %lld", order_revenue);
-	
-	// UPDATE INVENTORY - Decrease stock, increase sold quantity
-	for (int i = 0; i < product_count; i++)
-	{
-		if (_stricmp(inventory[i].name, processed_order.product_name) == 0) {
-			inventory[i].stock_quantity -= processed_order.quantity;
-			inventory[i].sold_quantity += processed_order.quantity;
-			break;
-		}
-	}
-	saveInventoryToFile("data/inventory.txt", inventory, product_count);
-	updateCustomerRevenue(&processed_order);
+
+	processCompletedOrder(&processed_order);
 	q->head = q->head->next;
 	if (q->head == NULL) q->tail = NULL;
 	delete(temp);
+	saveOrderQueueToFile("data/orders.txt", q);
 	return 1;
 }

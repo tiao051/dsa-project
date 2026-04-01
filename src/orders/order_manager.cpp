@@ -1,4 +1,5 @@
 #include "../../include/order_manager.h"
+#include "../../include/station_simulator.h"
 
 static const char* getPriorityText(PriorityLevel priority) {
 	if (priority == PRIORITY_EXPRESS) return "Express";
@@ -201,6 +202,7 @@ void insertOrderManual(OrderQueue* q) {
 	printf("\n\t\t\t\t\t\tDon gia ap dung: %lld", order.price);
 
 	if (enqueueOrder(q, order)) {
+		saveOrderQueueToFile("data/orders.txt", q);
 		printf("\n\t\t\t\t\t\t-> THEM DON HANG THANH CONG!!!!\n");
 	}
 
@@ -236,8 +238,6 @@ void displayOrderQueue(OrderQueue* q) {
 
 void processParallelPackaging(OrderQueue* q) {
 	int station_count = PACKING_STATION_COUNT;
-	int processed_count = 0;
-	long long total_revenue = 0;
 
 	if (isOrderQueueEmpty(q)) {
 		setColor(4);
@@ -252,25 +252,21 @@ void processParallelPackaging(OrderQueue* q) {
 	}
 
 	printf("\n\t\t\t\t\t\tSo tram dong goi cau hinh san: %d", station_count);
+	printf("\n\t\t\t\t\t\tMo phong theo tick (co preemption o phase XAC NHAN)");
+	resetCompletedOrderHistory();
 
-	int round = 1;
-	while (!isOrderQueueEmpty(q)) {
-		printf("\n\n\t\t\t\t\t\t--- Dot dong goi %d ---", round);
-		for (int station = 1; station <= station_count && !isOrderQueueEmpty(q); station++) {
-			Order processed_order;
-			printf("\n\t\t\t\t\t\t[Tram %d] Dang nhan don uu tien cao nhat...", station);
-			if (dequeueOrder(q, &processed_order)) {
-				long long revenue = processed_order.price * (long long)processed_order.quantity;
-				total_revenue += revenue;
-				processed_count++;
-			}
-		}
-		round++;
+	Station stations[PACKING_STATION_COUNT];
+	for (int i = 0; i < station_count; i++) {
+		initStation(&stations[i], i + 1);
 	}
 
+	while (!isOrderQueueEmpty(q) || hasActiveStations(stations, station_count)) {
+		runOneTick(stations, station_count, *q);
+	}
+
+	saveOrderQueueWithHistory("data/orders.txt", q);
+
 	setColor(2);
-	printf("\n\n\t\t\t\t\t\tHOAN TAT DONG GOI!");
-	printf("\n\t\t\t\t\t\tTong so don da giao cho DVVC: %d", processed_count);
-	printf("\n\t\t\t\t\t\tTong doanh thu ghi nhan: %lld", total_revenue);
+	printf("\n\n\t\t\t\t\t\tHOAN TAT DONG GOI THEO TICK!");
 	setColor(7);
 }
