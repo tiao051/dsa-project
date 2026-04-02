@@ -50,7 +50,7 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 		if (inventory[*nSP].stock_quantity <= 0) {
 			setColor(4); printf("\t\t\t\t\t\t[!] So luong phai lon hon 0!\n"); setColor(7);
 		}
-		else if (inventory[*nSP].stock_quantity > 1000) { // Gi? s? gi?i h?n l� 1000 don v?
+		else if (inventory[*nSP].stock_quantity > 1000) { // Assume 1000 units as the hard stock cap per product.
 			setColor(4); printf("\t\t\t\t\t\t[!] So luong qua lon (Toi da 1000)!\n"); setColor(7);
 			inventory[*nSP].stock_quantity = 0; // Trigger re-entry
 		}

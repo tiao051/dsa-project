@@ -254,6 +254,7 @@ void processParallelPackaging(OrderQueue* q) {
 	printf("\n\t\t\t\t\t\tSo tram dong goi cau hinh san: %d", station_count);
 	printf("\n\t\t\t\t\t\tMo phong theo tick (co preemption o phase XAC NHAN)");
 	resetCompletedOrderHistory();
+	resetStationTickCounter();
 
 	Station stations[PACKING_STATION_COUNT];
 	for (int i = 0; i < station_count; i++) {

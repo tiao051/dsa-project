@@ -58,12 +58,17 @@ static void updateCustomerRevenue(const Order* order) {
 int getOrderPriorityRank(const Order* order) {
 	if (order == NULL) return 3;
 
-	if (order->priority == PRIORITY_EXPRESS) return 1;
-	if (order->priority == PRIORITY_VIP) return 2;
-	return 3;
+	// Why this helper exists:
+	// We compare priorities in many places (queue sorting, preemption, logging).
+	// A single normalization point prevents duplicated if/else chains and keeps
+	// all modules aligned on the same business rule: 1 (highest) -> 3 (lowest).
+	int raw = (int)order->priority;
+	if (raw < 1 || raw > 3) return PRIORITY_NORMAL;
+	return raw;
 }
 
 static int compareOrderPriority(const Order* lhs, const Order* rhs) {
+	// Returning positive means lhs should be placed ahead of rhs in the queue.
 	int lhs_rank = getOrderPriorityRank(lhs);
 	int rhs_rank = getOrderPriorityRank(rhs);
 	if (lhs_rank != rhs_rank) {
@@ -164,7 +169,10 @@ int enqueueOrder(OrderQueue* q, Order order) {
 		return 1;
 	}
 
-	// Priority queue: Hoa toc > Tieu chuan, then customer tier, stable in same priority.
+	// Why linked-list insertion is done here instead of sorting later:
+	// keeping queue always sorted makes dequeue O(1) for highest-priority order,
+	// which is critical because dispatch/preemption reads queue head every tick.
+	// Ordering rule: lower rank means higher priority (1 > 2 > 3), stable on ties.
 	if (compareOrderPriority(&order, &q->head->info) > 0) {
 		node->next = q->head;
 		q->head = node;

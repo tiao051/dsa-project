@@ -11,14 +11,14 @@
 #include <time.h>
 
 #define MAXSIZE 100
-#define PACKING_STATION_COUNT 3
+#define PACKING_STATION_COUNT 4
 
 // Enums 
 
 typedef enum {
-    PRIORITY_NORMAL  = 0,
-    PRIORITY_VIP     = 1,
-    PRIORITY_EXPRESS = 2
+    PRIORITY_EXPRESS = 1,
+    PRIORITY_VIP     = 2,
+    PRIORITY_NORMAL  = 3
 } PriorityLevel;
 
 typedef enum {
@@ -135,6 +135,7 @@ void resetCompletedOrderHistory();
 void saveOrderQueueWithHistory(const char* filename, OrderQueue* pending_queue);
 void insertOrderManual(OrderQueue* q); 
 void processParallelPackaging(OrderQueue* q);
+void runPackagingScenarioFromFile(OrderQueue* queue, const char* scenario_file);
 
 // Core Operations - Customer List
 int insertCustomerTail(CustomerList* l, Customer x);

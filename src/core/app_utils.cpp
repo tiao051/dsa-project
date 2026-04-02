@@ -125,7 +125,7 @@ void processOrder(OrderQueue* q) {
 	do {
 		system("cls");
 		menuOrder();
-		choice = readMenuChoiceInRange(0, 3);
+		choice = readMenuChoiceInRange(0, 4);
 
 		switch (choice) {
 		case 1:
@@ -143,6 +143,12 @@ void processOrder(OrderQueue* q) {
 		case 3:
 			setColor(7);
 			displayOrderQueue(q);
+			pause();
+			break;
+
+		case 4:
+			setColor(7);
+			runPackagingScenarioFromFile(q, "data/order_scenario.txt");
 			pause();
 			break;
 
