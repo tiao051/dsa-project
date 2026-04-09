@@ -41,7 +41,7 @@ static void processSearchOrderById(OrderQueue* order_queue) {
 	setColor(7);
 	printf("\n\t\t\t\t\t\tNHAP MA DON: ");
 	scanf("%d", &search_order_id);
-	getchar();
+	clearInputBuffer();
 
 	OrderNode* foundOrderNode = findOrderById(order_queue, search_order_id);
 	if (foundOrderNode != NULL) {
@@ -60,7 +60,6 @@ static void processSearchCustomerByName(CustomerList* customer_list) {
 
 	setColor(7);
 	printf("\n\t\t\t\t\t\tNHAP TEN KHACH HANG: ");
-	getchar();
 	fgets(search_name, sizeof(search_name), stdin);
 	search_name[strcspn(search_name, "\n")] = '\0';
 

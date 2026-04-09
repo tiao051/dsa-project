@@ -47,5 +47,7 @@ cmake_install.cmake
 build/
 out/
 
+data/
+
 # Upgrade logs
 UpgradeLog*.htm

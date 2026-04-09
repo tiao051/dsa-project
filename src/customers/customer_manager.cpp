@@ -61,6 +61,44 @@ int isCustomerNameDuplicate(CustomerList* list, const char* name) {
 	return 0;  // No duplicate
 }
 
+static void generateUniqueCustomerName(CustomerList* customer_list, const char* base_name, char* out_name, size_t out_size) {
+	if (out_name == NULL || out_size == 0) {
+		return;
+	}
+
+	strncpy(out_name, base_name, out_size - 1);
+	out_name[out_size - 1] = '\0';
+
+	if (!isCustomerNameDuplicate(customer_list, out_name)) {
+		return;
+	}
+
+	for (int suffix = 1; suffix <= 9999; suffix++) {
+		char suffix_text[16];
+		sprintf(suffix_text, "%02d", suffix);
+
+		size_t suffix_len = strlen(suffix_text);
+		size_t base_len = strlen(base_name);
+		size_t max_base_len = (out_size - 1 > suffix_len) ? (out_size - 1 - suffix_len) : 0;
+		if (base_len > max_base_len) {
+			base_len = max_base_len;
+		}
+
+		char candidate[100];
+		memset(candidate, 0, sizeof(candidate));
+		if (base_len > 0) {
+			strncpy(candidate, base_name, base_len);
+		}
+		strcat(candidate, suffix_text);
+
+		if (!isCustomerNameDuplicate(customer_list, candidate)) {
+			strncpy(out_name, candidate, out_size - 1);
+			out_name[out_size - 1] = '\0';
+			return;
+		}
+	}
+}
+
 static const char* getTierName(CustomerTier tier) {
 	if (tier == TIER_NORMAL) return "Thuong";
 	if (tier == TIER_VIP) return "VIP";
@@ -97,9 +135,16 @@ static int readValidCustomerName(CustomerList* customer_list, char* out_name, si
 			showErrorMessage("[!] Ten khach hang khong duoc chua so hoac ki tu dac biet!");
 		}
 		else if (isCustomerNameDuplicate(customer_list, out_name)) {
-			showErrorMessage("[!] Ten khach hang nay da ton tai!");
+			char original_name[100];
+			strncpy(original_name, out_name, sizeof(original_name) - 1);
+			original_name[sizeof(original_name) - 1] = '\0';
+
+			generateUniqueCustomerName(customer_list, original_name, out_name, out_size);
+			setColor(3);
+			printf("\n\t\t\t\t\t\t[!] Ten khach hang nay da ton tai! Tu dong doi thanh: %s", out_name);
+			setColor(7);
 		}
-	} while (strlen(out_name) == 0 || !isValidName(out_name) || isCustomerNameDuplicate(customer_list, out_name));
+	} while (strlen(out_name) == 0 || !isValidName(out_name));
 
 	return 1;
 }
@@ -145,6 +190,7 @@ void registerNewCustomer(CustomerList* customer_list) {
 	if (insertCustomerTail(customer_list, customer)) {
 		printf("\n\t\t\t\t\t\t->THEM KHACH HANG THANH CONG");
 		printf("\n\t\t\t\t\t\tID: %s", customer.id);
+		printf("\n\t\t\t\t\t\tTen: %s", customer.name);
 		printf("\n\t\t\t\t\t\tHang: %s (Mac dinh)", getTierName(customer.tier));
 		printf("\n\t\t\t\t\t\tTrang thai: %s (Mac dinh)", getDisplayStatus(customer.status));
 		appendCustomerToFile("data/customers.txt", &customer);

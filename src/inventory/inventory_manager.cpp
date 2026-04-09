@@ -7,9 +7,6 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 		return;
 	}
 
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
-
 	// Auto-generate product ID based on file
 	generateNextProductId(&inventory[*nSP].id);
 
@@ -83,9 +80,6 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 void importStock(Product inventory[MAXSIZE], int* product_count) {
 	int product_id, additional_quantity;
 
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
-
 	printf("\n\t\t\t\t\t\tNHAP ID SAN PHAM DE THEM VAO KHO: ");
 	if (scanf("%d", &product_id) != 1) {
 		while (getchar() != '\n');
@@ -133,9 +127,6 @@ void importStock(Product inventory[MAXSIZE], int* product_count) {
 void updateInventory(Product inventory[MAXSIZE], int* product_count) {
 	int product_id;
 	AmountType new_price, old_price;
-
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
 
 	printf("\n\t\t\t\t\t\tNhap ID san pham can cap nhat: ");
 	if (scanf("%d", &product_id) != 1) {
@@ -206,9 +197,6 @@ void deleteProduct(Product inventory[MAXSIZE], int* product_count) {
 	int product_id;
 	char confirm;
 	char product_name[100];
-
-	int c;
-	while ((c = getchar()) != '\n' && c != EOF);
 
 	printf("\n\t\t\t\t\t\tNhap ID san pham can xoa: ");
 	if (scanf("%d", &product_id) != 1) {
