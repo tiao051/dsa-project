@@ -1,4 +1,4 @@
-#include "../../include/order_manager.h"
+#include "../../../include/order_manager.h"
 
 #include <chrono>
 
@@ -90,7 +90,7 @@ static double runLinkedBenchmarkMs(int order_count) {
 }
 
 void runQueueBenchmarkComparison() {
-	const int order_count = 100000;
+	const int order_count = 1000000;
 
 	setColor(11);
 	printf("\n\t\t\t\t\t\t=== BENCHMARK QUEUE: MANG vs DSLK ===");

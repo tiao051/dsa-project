@@ -78,6 +78,26 @@ static int compareOrderPriority(const Order* lhs, const Order* rhs) {
 	return 0;
 }
 
+static void appendRevenueLog(const Order* order) {
+	if (order == NULL) return;
+
+	FILE* file_ptr = fopen("data/order_revenue_log.txt", "a+t");
+	if (file_ptr == NULL) {
+		return;
+	}
+
+	time_t now = time(NULL);
+	struct tm local_tm;
+	localtime_s(&local_tm, &now);
+
+	char day[11];
+	strftime(day, sizeof(day), "%Y-%m-%d", &local_tm);
+	long long revenue = order->price * (long long)order->quantity;
+
+	fprintf(file_ptr, "%s,%d,%lld\n", day, order->id, revenue);
+	fclose(file_ptr);
+}
+
 void processCompletedOrder(const Order* order) {
 	if (order == NULL) return;
 	ensureCompletedHistoryInitialized();
@@ -92,6 +112,7 @@ void processCompletedOrder(const Order* order) {
 
 	saveInventoryToFile("data/inventory.txt", inventory, product_count);
 	updateCustomerRevenue(order);
+	appendRevenueLog(order);
 
 	Order completed_order = *order;
 	strcpy(completed_order.status, "Hoan thanh");

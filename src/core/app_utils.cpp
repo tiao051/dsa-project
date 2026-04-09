@@ -311,21 +311,25 @@ void processStatistics() {
 	do {
 		system("cls");
 		menuStatistics();
-		choice = readMenuChoiceInRange(0, 4);
+		choice = readMenuChoiceInRange(0, 5);
 		switch (choice) {
 		case 1:
-			showErrorMessage("[!] Chuc nang dang duoc hoan thien.");
+			reportRevenueByDayMonth();
 			pause();
 			break;
 		case 2:
-			showErrorMessage("[!] Chuc nang dang duoc hoan thien.");
+			reportOrderProcessingPerformance();
 			pause();
 			break;
 		case 3:
-			showErrorMessage("[!] Chuc nang dang duoc hoan thien.");
+			reportOutOfStockHighDemandProducts();
 			pause();
 			break;
 		case 4:
+			reportExpressVsStandardRatio();
+			pause();
+			break;
+		case 5:
 			runQueueBenchmarkComparison();
 			pause();
 			break;

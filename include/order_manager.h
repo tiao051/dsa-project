@@ -201,13 +201,15 @@ char readYesNoChoice(const char* prompt);
 
 // Secondary Process Functions
 void processStatistics();
+void reportRevenueByDayMonth();
+void reportOrderProcessingPerformance();
+void reportOutOfStockHighDemandProducts();
+void reportExpressVsStandardRatio();
 void runQueueBenchmarkComparison();
 void processSearchSort(OrderQueue* q, CustomerList* l);
 void startApp();
 void processInventory(Product inv[], int* count);
 void processOrder(OrderQueue* q);
-void processSearchSort(OrderQueue* q, CustomerList* l);
 void processCustomer(CustomerList* l);
-void processStatistics();
 
 #endif
