@@ -242,3 +242,37 @@ int dequeueOrder(OrderQueue* q, Order* out_order) {
 	saveOrderQueueToFile("data/orders.txt", q);
 	return 1;
 }
+
+int cancelPendingOrderById(OrderQueue* q, int id) {
+	if (q == NULL || q->head == NULL) {
+		return 0;
+	}
+
+	OrderNode* prev = NULL;
+	OrderNode* current = q->head;
+
+	while (current != NULL) {
+		if (current->info.id == id) {
+			// Preserve linked-list integrity for all delete positions: head, middle, tail.
+			if (prev == NULL) {
+				q->head = current->next;
+			}
+			else {
+				prev->next = current->next;
+			}
+
+			if (current == q->tail) {
+				q->tail = prev;
+			}
+
+			delete current;
+			saveOrderQueueToFile("data/orders.txt", q);
+			return 1;
+		}
+
+		prev = current;
+		current = current->next;
+	}
+
+	return 0;
+}

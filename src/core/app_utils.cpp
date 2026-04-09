@@ -195,7 +195,7 @@ void processOrder(OrderQueue* q) {
 	do {
 		system("cls");
 		menuOrder();
-		choice = readMenuChoiceInRange(0, 4);
+		choice = readMenuChoiceInRange(0, 7);
 
 		switch (choice) {
 		case 1:
@@ -224,6 +224,24 @@ void processOrder(OrderQueue* q) {
 		case 4:
 			setColor(7);
 			runPackagingScenarioFromFile(q, "data/order_scenario.txt");
+			pause();
+			break;
+
+		case 5:
+			setColor(7);
+			processCancelPendingOrder(q);
+			pause();
+			break;
+
+		case 6:
+			setColor(7);
+			processBackupSystemState(inventory, product_count, q);
+			pause();
+			break;
+
+		case 7:
+			setColor(7);
+			processRestoreSystemState(inventory, &product_count, q);
 			pause();
 			break;
 

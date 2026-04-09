@@ -141,7 +141,7 @@ void reportOrderProcessingPerformance() {
 	printf("\n\t\t\t\t\t\tTong so don trong he thong: %d", total);
 	printf("\n\t\t\t\t\t\tSo don da xu ly: %d", processed_count);
 	printf("\n\t\t\t\t\t\tSo don ton dong (theo file): %d", pending_file_count);
-	printf("\n\t\t\t\t\t\tSo don ton dong trong Queue runtime: %d", pending_queue_count);
+	printf("\n\t\t\t\t\t\tSo don ton dong trong hang doi: %d", pending_queue_count);
 }
 
 void reportOutOfStockHighDemandProducts() {

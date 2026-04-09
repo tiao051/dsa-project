@@ -8,6 +8,30 @@ int product_count = 0;
 
 int menu_choice;
 
+static void releaseOrderQueueMemory(OrderQueue* q) {
+	if (q == NULL) return;
+	OrderNode* node = q->head;
+	while (node != NULL) {
+		OrderNode* next = node->next;
+		delete node;
+		node = next;
+	}
+	q->head = NULL;
+	q->tail = NULL;
+}
+
+static void releaseCustomerListMemory(CustomerList* list) {
+	if (list == NULL) return;
+	CustomerNode* node = list->head;
+	while (node != NULL) {
+		CustomerNode* next = node->next;
+		delete node;
+		node = next;
+	}
+	list->head = NULL;
+	list->tail = NULL;
+}
+
 static int readMainMenuChoice() {
 	int choice;
 	while (1) {
@@ -101,5 +125,10 @@ int main() {
 	loadOrderFile("data/orders.txt", &order_queue);
 
 	startApp();
+
+	// Explicit cleanup keeps leak detectors quiet on normal process shutdown.
+	releaseOrderQueueMemory(&order_queue);
+	releaseCustomerListMemory(&customer_list);
+	resetCompletedOrderHistory();
 	return 0;
 }

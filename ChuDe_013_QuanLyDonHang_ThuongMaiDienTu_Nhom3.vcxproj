@@ -130,6 +130,7 @@
     <ClCompile Include="src\core\app_utils.cpp" />
     <ClCompile Include="src\core\benchmark\queue_benchmark.cpp" />
     <ClCompile Include="src\core\reports\statistics_reports.cpp" />
+    <ClCompile Include="src\core\system\system_utilities.cpp" />
     <ClCompile Include="src\core\main.cpp" />
     <ClCompile Include="src\common\console_utils.cpp" />
     <ClCompile Include="src\common\file_handler.cpp" />
