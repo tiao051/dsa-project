@@ -89,7 +89,7 @@ void menuStatistics() {
 	printf("\t\t\t\t\t\t|1. Tong doanh thu                                    |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|2. So don da xu ly                                   |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|3. So luong don con ton dong trong Queue             |\t\t\t\t\t\n");
-	printf("\t\t\t\t\t\t|4. Ti le don hoa toc                                 |\t\t\t\t\t\n");
+	printf("\t\t\t\t\t\t|4. Benchmark Queue Mang vs DSLK (1tr Dat + 1tr Xu ly) |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t -----------------------------------------------------\t\t\t\t\t\n");
 }

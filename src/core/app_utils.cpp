@@ -313,10 +313,22 @@ void processStatistics() {
 		menuStatistics();
 		choice = readMenuChoiceInRange(0, 4);
 		switch (choice) {
-		case 1:break;
-		case 2:break;
-		case 3:break;
-		case 4:break;
+		case 1:
+			showErrorMessage("[!] Chuc nang dang duoc hoan thien.");
+			pause();
+			break;
+		case 2:
+			showErrorMessage("[!] Chuc nang dang duoc hoan thien.");
+			pause();
+			break;
+		case 3:
+			showErrorMessage("[!] Chuc nang dang duoc hoan thien.");
+			pause();
+			break;
+		case 4:
+			runQueueBenchmarkComparison();
+			pause();
+			break;
 		case 0:
 			printBackToMainMessage();
 			break;

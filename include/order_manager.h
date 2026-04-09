@@ -200,6 +200,7 @@ char readYesNoChoice(const char* prompt);
 
 // Secondary Process Functions
 void processStatistics();
+void runQueueBenchmarkComparison();
 void processSearchSort(OrderQueue* q, CustomerList* l);
 void startApp();
 void processInventory(Product inv[], int* count);
