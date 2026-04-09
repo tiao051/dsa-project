@@ -55,23 +55,94 @@ static void processSearchOrderById(OrderQueue* order_queue) {
 	pause();
 }
 
+static void printDuplicatePhoneSuggestions(CustomerList* customer_list, const char* name) {
+	CustomerNode* node = customer_list->head;
+	int index = 1;
+
+	printf("\n\t\t\t\t\t\tCac SDT trung ten:");
+	while (node != NULL) {
+		if (strcmp(node->info.name, name) == 0) {
+			printf("\n\t\t\t\t\t\t%d. %s", index, node->info.phone);
+			index++;
+		}
+		node = node->next;
+	}
+	printf("\n");
+}
+
 static void processSearchCustomerByName(CustomerList* customer_list) {
 	char search_name[100];
+	char phone[32];
+	int matched_count = 0;
+	CustomerNode* first_match = NULL;
+	CustomerNode* node = NULL;
 
 	setColor(7);
 	printf("\n\t\t\t\t\t\tNHAP TEN KHACH HANG: ");
 	fgets(search_name, sizeof(search_name), stdin);
 	search_name[strcspn(search_name, "\n")] = '\0';
+	trimString(search_name);
 
-	CustomerNode* foundCustomerNode = findCustomerByName(customer_list, search_name);
-	if (foundCustomerNode != NULL) {
+	if (strlen(search_name) == 0) {
+		showErrorMessage("[!] Ten khach hang khong duoc de trong!");
+		pause();
+		return;
+	}
+
+	node = customer_list->head;
+	while (node != NULL) {
+		if (strcmp(node->info.name, search_name) == 0) {
+			if (first_match == NULL) {
+				first_match = node;
+			}
+			matched_count++;
+		}
+		node = node->next;
+	}
+
+	if (matched_count == 0) {
+		printf("\n\t\t\t\t\t\tKHONG TIM THAY KHACH HANG!\n");
+		pause();
+		return;
+	}
+
+	if (matched_count == 1) {
 		printf("\n\t\t\t\t\t\tTIM THAY KHACH HANG!\n");
 		printCustomerHeader();
-		printSingleCustomer(foundCustomerNode->info);
+		printSingleCustomer(first_match->info);
+		pause();
+		return;
 	}
-	else {
-		printf("\n\t\t\t\t\t\tKHONG TIM THAY KHACH HANG!\n");
+
+	setColor(3);
+	printf("\n\t\t\t\t\t\t[!] Co %d khach hang trung ten. Vui long nhap them so dien thoai.", matched_count);
+	setColor(7);
+	printDuplicatePhoneSuggestions(customer_list, search_name);
+
+	do {
+		printf("\n\t\t\t\t\t\tNhap vao so dien thoai: ");
+		fgets(phone, sizeof(phone), stdin);
+		phone[strcspn(phone, "\n")] = '\0';
+		trimString(phone);
+
+		if (!isNumeric(phone)) {
+			showErrorMessage("[!] So dien thoai khong hop le");
+		}
+	} while (!isNumeric(phone));
+
+	node = customer_list->head;
+	while (node != NULL) {
+		if (strcmp(node->info.name, search_name) == 0 && strcmp(node->info.phone, phone) == 0) {
+			printf("\n\t\t\t\t\t\tTIM THAY KHACH HANG!\n");
+			printCustomerHeader();
+			printSingleCustomer(node->info);
+			pause();
+			return;
+		}
+		node = node->next;
 	}
+
+	printf("\n\t\t\t\t\t\tKHONG TIM THAY KHACH HANG voi ten '%s' va SDT '%s'!\n", search_name, phone);
 	pause();
 }
 

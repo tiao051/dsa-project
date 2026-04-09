@@ -9,9 +9,9 @@ void printProductHeader() {
 
 // Order table header
 void printOrderHeader() {
-	printf("\t| %-16s | %-20s | %-20s | %-8s | %-10s | %-10s | %-18s | %10s |\n",
-		"Ma Don Hang", "Ten Khach Hang", "Ten San Pham", "SoLuong", "VanChuyen", "UuTien", "TrangThai", "Don Gia");
-	printf("\t|------------------|----------------------|----------------------|----------|------------|------------|--------------------|------------|\n");
+	printf("\t\t| %-16s | %-20s | %-20s | %-8s | %-11s | %-10s | %-18s | %10s |\n",
+		"Ma Don Hang", "Ten Khach Hang", "Ten San Pham", "So Luong", "Van Chuyen", "Uu Tien", "Trang Thai", "Don Gia");
+	printf("\t\t|------------------|----------------------|----------------------|----------|-------------|------------|--------------------|------------|\n");
 }
 // Customer table header
 void printCustomerHeader() {

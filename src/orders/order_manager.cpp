@@ -212,7 +212,7 @@ void insertOrderManual(OrderQueue* q) {
 void printSingleOrder(Order order) {
 	char ma_don[24];
 	sprintf(ma_don, "Order%d", order.id);
-	printf("\t| %-16s | %-20s | %-20s | %-8d | %-10s | %-10s | %-18s | %10lld |\n",
+	printf("\t\t| %-16s | %-20s | %-20s | %-8d | %-11s | %-10s | %-18s | %10lld |\n",
 		ma_don,
 		order.customer_name,
 		order.product_name,
@@ -225,7 +225,7 @@ void printSingleOrder(Order order) {
 
 // Display all orders in queue
 void displayOrderQueue(OrderQueue* q) {
-	printf("\t\t----------------------------------------------- DANH SACH DON HANG -----------------------------------------------\n");
+	printf("\t\t================================ DANH SACH DON HANG ================================\n");
 	printOrderHeader();
 	OrderNode* node = q->head;
 	while(node != NULL)
@@ -233,7 +233,7 @@ void displayOrderQueue(OrderQueue* q) {
 		printSingleOrder(node->info);
 		node = node->next;
 	}
-	printf("\t\t-------------------------------------------------------------------------------------------------------------------\n");
+	printf("\t\t====================================================================================\n");
 }
 
 void processParallelPackaging(OrderQueue* q) {

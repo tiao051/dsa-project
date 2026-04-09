@@ -146,7 +146,7 @@ void adjustCustomerTierManual(CustomerList* l);
 // Validation helpers
 int isNumeric(const char* str);
 int isValidName(const char* name);
-int isCustomerNameDuplicate(CustomerList* list, const char* name);
+int isCustomerNamePhoneDuplicate(CustomerList* list, const char* name, const char* phone);
 
 // File I/O for customers
 void saveCustomerFile(const char* filename, CustomerList* list, int count);

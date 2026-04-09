@@ -47,13 +47,13 @@ int isValidName(const char* name) {
 	return 1;
 }
 
-// Helper function to check if customer name already exists
-int isCustomerNameDuplicate(CustomerList* list, const char* name) {
+// Helper function to check duplicate by composite key: name + phone
+int isCustomerNamePhoneDuplicate(CustomerList* list, const char* name, const char* phone) {
 	if (list == NULL || list->head == NULL) return 0;
 	
 	CustomerNode* node = list->head;
 	while (node != NULL) {
-		if (strcmp(node->info.name, name) == 0) {
+		if (strcmp(node->info.name, name) == 0 && strcmp(node->info.phone, phone) == 0) {
 			return 1;  // Duplicate found
 		}
 		node = node->next;
@@ -61,42 +61,48 @@ int isCustomerNameDuplicate(CustomerList* list, const char* name) {
 	return 0;  // No duplicate
 }
 
-static void generateUniqueCustomerName(CustomerList* customer_list, const char* base_name, char* out_name, size_t out_size) {
-	if (out_name == NULL || out_size == 0) {
-		return;
+static int countCustomersByName(CustomerList* list, const char* name) {
+	if (list == NULL || list->head == NULL) return 0;
+
+	int count = 0;
+	CustomerNode* node = list->head;
+	while (node != NULL) {
+		if (strcmp(node->info.name, name) == 0) {
+			count++;
+		}
+		node = node->next;
 	}
 
-	strncpy(out_name, base_name, out_size - 1);
-	out_name[out_size - 1] = '\0';
+	return count;
+}
 
-	if (!isCustomerNameDuplicate(customer_list, out_name)) {
-		return;
+static CustomerNode* findCustomerByNameAndPhone(CustomerList* list, const char* name, const char* phone) {
+	if (list == NULL || list->head == NULL) return NULL;
+
+	CustomerNode* node = list->head;
+	while (node != NULL) {
+		if (strcmp(node->info.name, name) == 0 && strcmp(node->info.phone, phone) == 0) {
+			return node;
+		}
+		node = node->next;
 	}
 
-	for (int suffix = 1; suffix <= 9999; suffix++) {
-		char suffix_text[16];
-		sprintf(suffix_text, "%02d", suffix);
+	return NULL;
+}
 
-		size_t suffix_len = strlen(suffix_text);
-		size_t base_len = strlen(base_name);
-		size_t max_base_len = (out_size - 1 > suffix_len) ? (out_size - 1 - suffix_len) : 0;
-		if (base_len > max_base_len) {
-			base_len = max_base_len;
-		}
+static void printDuplicatePhoneSuggestions(CustomerList* list, const char* name) {
+	CustomerNode* node = list->head;
+	int index = 1;
 
-		char candidate[100];
-		memset(candidate, 0, sizeof(candidate));
-		if (base_len > 0) {
-			strncpy(candidate, base_name, base_len);
+	printf("\n\t\t\t\t\t\tCac SDT trung ten:");
+	while (node != NULL) {
+		if (strcmp(node->info.name, name) == 0) {
+			printf("\n\t\t\t\t\t\t%d. %s", index, node->info.phone);
+			index++;
 		}
-		strcat(candidate, suffix_text);
-
-		if (!isCustomerNameDuplicate(customer_list, candidate)) {
-			strncpy(out_name, candidate, out_size - 1);
-			out_name[out_size - 1] = '\0';
-			return;
-		}
+		node = node->next;
 	}
+	printf("\n");
 }
 
 static const char* getTierName(CustomerTier tier) {
@@ -134,16 +140,6 @@ static int readValidCustomerName(CustomerList* customer_list, char* out_name, si
 		else if (!isValidName(out_name)) {
 			showErrorMessage("[!] Ten khach hang khong duoc chua so hoac ki tu dac biet!");
 		}
-		else if (isCustomerNameDuplicate(customer_list, out_name)) {
-			char original_name[100];
-			strncpy(original_name, out_name, sizeof(original_name) - 1);
-			original_name[sizeof(original_name) - 1] = '\0';
-
-			generateUniqueCustomerName(customer_list, original_name, out_name, out_size);
-			setColor(3);
-			printf("\n\t\t\t\t\t\t[!] Ten khach hang nay da ton tai! Tu dong doi thanh: %s", out_name);
-			setColor(7);
-		}
 	} while (strlen(out_name) == 0 || !isValidName(out_name));
 
 	return 1;
@@ -173,8 +169,14 @@ static void saveCurrentCustomerList(CustomerList* customer_list) {
 void registerNewCustomer(CustomerList* customer_list) {
 	Customer customer;
 
-	readValidCustomerName(customer_list, customer.name, sizeof(customer.name));
-	readValidCustomerPhone(customer.phone, sizeof(customer.phone));
+	do {
+		readValidCustomerName(customer_list, customer.name, sizeof(customer.name));
+		readValidCustomerPhone(customer.phone, sizeof(customer.phone));
+
+		if (isCustomerNamePhoneDuplicate(customer_list, customer.name, customer.phone)) {
+			showErrorMessage("[!] Khach hang voi ten va so dien thoai nay da ton tai!");
+		}
+	} while (isCustomerNamePhoneDuplicate(customer_list, customer.name, customer.phone));
 
 	// Set default tier to Normal
 	customer.tier = TIER_NORMAL;
@@ -310,6 +312,24 @@ void adjustCustomerTierManual(CustomerList* customer_list) {
 		return;
 	}
 
+	int same_name_count = countCustomersByName(customer_list, customer_name);
+	if (same_name_count > 1) {
+		char phone[32];
+		setColor(3);
+		printf("\n\t\t\t\t\t\t[!] Co %d khach hang trung ten. Vui long nhap them so dien thoai.", same_name_count);
+		setColor(7);
+		printDuplicatePhoneSuggestions(customer_list, customer_name);
+		readValidCustomerPhone(phone, sizeof(phone));
+
+		customer_node = findCustomerByNameAndPhone(customer_list, customer_name, phone);
+		if (customer_node == NULL) {
+			setColor(4);
+			printf("\n\t\t\t\t\t\t[!] Khong tim thay khach hang voi ten '%s' va SDT '%s'", customer_name, phone);
+			setColor(7);
+			return;
+		}
+	}
+
 	Customer* customer = &customer_node->info;
 	if (action == 1) {
 		if (customer->tier == TIER_EXPRESS) {
@@ -380,19 +400,53 @@ void deleteCustomer(CustomerList* customer_list) {
 	}
 
 	char name[100];
+	char phone[32];
 
 	printf("\n\t\t\t\t\t\tNhap ten khach hang can xoa: ");
 	fgets(name, sizeof(name), stdin);
 	name[strcspn(name, "\n")] = '\0';
 	trimString(name);
 
+	if (strlen(name) == 0) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Ten khach hang khong duoc de trong!");
+		setColor(7);
+		return;
+	}
+
+	int same_name_count = countCustomersByName(customer_list, name);
+	if (same_name_count == 0) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Khong tim thay khach hang ten: %s", name);
+		setColor(7);
+		return;
+	}
+
+	int need_phone = same_name_count > 1;
+	if (need_phone) {
+		setColor(3);
+		printf("\n\t\t\t\t\t\t[!] Co %d khach hang trung ten. Vui long nhap them so dien thoai.", same_name_count);
+		setColor(7);
+		printDuplicatePhoneSuggestions(customer_list, name);
+		readValidCustomerPhone(phone, sizeof(phone));
+	}
+
 	CustomerNode* node = customer_list->head;
 	CustomerNode* prev = NULL;
 
 	// Find customer
 	while (node != NULL) {
-		if (strcmp(node->info.name, name) == 0) {
+		int matched = 0;
+		if (!need_phone) {
+			matched = (strcmp(node->info.name, name) == 0);
+		}
+		else {
+			matched = (strcmp(node->info.name, name) == 0 && strcmp(node->info.phone, phone) == 0);
+		}
+
+		if (matched) {
 			printf("\n\t\t\t\t\t\tKHACH HANG CAN XOA: %s", node->info.name);
+			printf("\n\t\t\t\t\t\tSDT: %s", node->info.phone);
 			char confirm;
 			confirm = readYesNoChoice("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
 
@@ -425,6 +479,11 @@ void deleteCustomer(CustomerList* customer_list) {
 	}
 
 	setColor(4);
-	printf("\n\t\t\t\t\t\t[!] Khong tim thay khach hang ten: %s", name);
+	if (need_phone) {
+		printf("\n\t\t\t\t\t\t[!] Khong tim thay khach hang voi ten '%s' va SDT '%s'", name, phone);
+	}
+	else {
+		printf("\n\t\t\t\t\t\t[!] Khong tim thay khach hang ten: %s", name);
+	}
 	setColor(7);
 }
