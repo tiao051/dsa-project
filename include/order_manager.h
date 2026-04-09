@@ -133,7 +133,8 @@ int getOrderPriorityRank(const Order* order);
 void processCompletedOrder(const Order* order);
 void resetCompletedOrderHistory();
 void saveOrderQueueWithHistory(const char* filename, OrderQueue* pending_queue);
-void insertOrderManual(OrderQueue* q); 
+int insertOrderManual(OrderQueue* q);
+void displayOrderProgressFromFile(const char* filename);
 void processParallelPackaging(OrderQueue* q);
 void runPackagingScenarioFromFile(OrderQueue* queue, const char* scenario_file);
 

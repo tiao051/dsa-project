@@ -200,13 +200,18 @@ void processOrder(OrderQueue* q) {
 		switch (choice) {
 		case 1:
 			setColor(7);
-			insertOrderManual(q);
+			if (insertOrderManual(q)) {
+				setColor(3);
+				printf("\n\t\t\t\t\t\tTu dong kich hoat dong goi don hang...\n");
+				setColor(7);
+				processParallelPackaging(q);
+			}
 			pause();
 			break;
 
 		case 2:
 			setColor(7);
-			processParallelPackaging(q);
+			displayOrderProgressFromFile("data/orders.txt");
 			pause();
 			break;
 

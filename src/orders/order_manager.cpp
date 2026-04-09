@@ -108,16 +108,29 @@ static int readOrderQuantity(int* out_quantity) {
 	return 1;
 }
 
+// Return value:
+// 1  -> valid stock for current quantity
+// 0  -> product still has stock but requested quantity is too high
+// -1 -> product is out of stock, caller should reselect another product
 static int validateAvailableStock(OrderQueue* q, int product_index, int order_quantity) {
 	int reserved_quantity = getReservedQuantityInQueue(q, inventory[product_index].name);
 	int available_stock = inventory[product_index].stock_quantity - reserved_quantity;
+
+	if (available_stock <= 0) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] SAN PHAM DA HET HANG. VUI LONG CHON SAN PHAM KHAC.");
+		setColor(7);
+		return -1;
+	}
+
 	if (available_stock < order_quantity) {
 		setColor(4);
-		printf("\n\t\t\t\t\t\tTU CHOI: SAN PHAM CHI CON %d CHUA DUOC DAT", available_stock > 0 ? available_stock : 0);
+		printf("\n\t\t\t\t\t\tTU CHOI: SAN PHAM CHI CON %d CHUA DUOC DAT", available_stock);
 		printf("\n\t\t\t\t\t\tGOI Y: Vui long giam so luong hoac chon san pham khac.");
 		setColor(7);
 		return 0;
 	}
+
 	return 1;
 }
 
@@ -145,11 +158,12 @@ static int readShippingMethod(ShippingMethod* out_shipping_method) {
 }
 
 // Create and input a new order with stock validation
-void insertOrderManual(OrderQueue* q) {
+int insertOrderManual(OrderQueue* q) {
 	Order order;
 	CustomerNode* customer_node = NULL;
 	int product_index = -1;
 	PriorityLevel tier_priority;
+	int created_success = 0;
 
 	order.id = generateNextOrderId(q);
 	printf("\n\t\t\t\t\t\tMa don duoc tao tu dong: %d", order.id);
@@ -166,23 +180,39 @@ void insertOrderManual(OrderQueue* q) {
 	}
 
 	while (1) {
-		if (!readTrimmedLine("Nhap Ten San Pham: ", order.product_name, sizeof(order.product_name),
-			"[!] Ten san pham khong duoc de trong!")) {
-			continue;
+		while (1) {
+			if (!readTrimmedLine("Nhap Ten San Pham: ", order.product_name, sizeof(order.product_name),
+				"[!] Ten san pham khong duoc de trong!")) {
+				continue;
+			}
+
+			if (resolveOrderProduct(order.product_name, &product_index)) {
+				break;
+			}
 		}
 
-		if (resolveOrderProduct(order.product_name, &product_index)) {
+		int stock_state = 0;
+		while (1) {
+			if (!readOrderQuantity(&order.quantity)) {
+				continue;
+			}
+
+			stock_state = validateAvailableStock(q, product_index, order.quantity);
+			if (stock_state == 1) {
+				break;
+			}
+
+			if (stock_state == -1) {
+				break;
+			}
+		}
+
+		if (stock_state == 1) {
 			break;
 		}
-	}
 
-	while (1) {
-		if (!readOrderQuantity(&order.quantity)) {
+		if (stock_state == -1) {
 			continue;
-		}
-
-		if (validateAvailableStock(q, product_index, order.quantity)) {
-			break;
 		}
 	}
 
@@ -204,8 +234,13 @@ void insertOrderManual(OrderQueue* q) {
 	if (enqueueOrder(q, order)) {
 		saveOrderQueueToFile("data/orders.txt", q);
 		printf("\n\t\t\t\t\t\t-> THEM DON HANG THANH CONG!!!!\n");
+		created_success = 1;
+	}
+	else {
+		showErrorMessage("[!] Khong the them don hang vao hang doi!");
 	}
 
+	return created_success;
 }
 
 // Print single order
@@ -234,6 +269,80 @@ void displayOrderQueue(OrderQueue* q) {
 		node = node->next;
 	}
 	printf("\t\t====================================================================================\n");
+}
+
+void displayOrderProgressFromFile(const char* filename) {
+	FILE* file_ptr = fopen(filename, "rt");
+	if (file_ptr == NULL) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Khong tim thay file du lieu don hang!");
+		setColor(7);
+		return;
+	}
+
+	int total = 0;
+	if (fscanf(file_ptr, "%d\n", &total) != 1 || total <= 0) {
+		fclose(file_ptr);
+		setColor(3);
+		printf("\n\t\t\t\t\t\tChua co don hang nao de theo doi.");
+		setColor(7);
+		return;
+	}
+
+	int waiting_count = 0;
+	int processing_count = 0;
+	int done_count = 0;
+
+	printf("\t\t============================= TIEN DO XU LY DON HANG =============================\n");
+	printOrderHeader();
+
+	char line[512];
+	while (fgets(line, sizeof(line), file_ptr) != NULL) {
+		Order order;
+		int priority = 0;
+		int shipping_method = 0;
+
+		int parsed = sscanf(line, "%d,%99[^,],%99[^,],%d,%lld,%d,%d,%99[^\n]",
+			&order.id,
+			order.customer_name,
+			order.product_name,
+			&order.quantity,
+			&order.price,
+			&priority,
+			&shipping_method,
+			order.status);
+
+		if (parsed != 8) {
+			continue;
+		}
+
+		order.priority = (PriorityLevel)priority;
+		order.shipping_method = (ShippingMethod)shipping_method;
+		trimString(order.customer_name);
+		trimString(order.product_name);
+		trimString(order.status);
+
+		if (_stricmp(order.status, "Hoan thanh") == 0 || _stricmp(order.status, "Da giao cho DVVC") == 0) {
+			done_count++;
+		}
+		else if (_stricmp(order.status, "Cho dong goi") == 0) {
+			waiting_count++;
+		}
+		else {
+			processing_count++;
+		}
+
+		printSingleOrder(order);
+	}
+
+	fclose(file_ptr);
+
+	printf("\t\t====================================================================================\n");
+	printf("\n\t\t\t\t\t\tTong don: %d | Cho dong goi: %d | Dang xu ly: %d | Hoan thanh: %d",
+		total,
+		waiting_count,
+		processing_count,
+		done_count);
 }
 
 void processParallelPackaging(OrderQueue* q) {
