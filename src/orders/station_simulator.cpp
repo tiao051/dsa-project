@@ -39,6 +39,11 @@ static const char* getPriorityLabelByRank(int rank) {
     return "TIEU CHUAN";
 }
 
+static const char* getPriorityRelationText(int higher_rank, int lower_rank) {
+    if (higher_rank == lower_rank) return "BANG NHAU";
+    return "CAO HON";
+}
+
 static bool dequeuePriorityOrder(PriorityQueue& queue, Order* out_order) {
     if (queue.head == NULL || out_order == NULL) {
         return false;
@@ -115,13 +120,13 @@ static bool assignOneIdleStation(Station stations[], int n, PriorityQueue& queue
             Order next_order;
             if (dequeuePriorityOrder(queue, &next_order)) {
                 startOrderAtStation(&stations[i], &next_order);
-                printf("\n\t\t\t\t\t\t[Phan cong] Tram %d nhan don %d (uu tien %d)",
+                int rank = getOrderPriorityRank(stations[i].currentOrder);
+                printf("\n\t\t\t\t\t\t[Phan cong] Tram %d nhan don %d",
                     stations[i].id,
-                    stations[i].currentOrder->id,
-                    getOrderPriorityRank(stations[i].currentOrder));
-
-                printf(" - %s",
-                    getPriorityLabelByRank(getOrderPriorityRank(stations[i].currentOrder)));
+                    stations[i].currentOrder->id);
+                printf(" - Uu tien: %s (muc %d; 1=HOA TOC > 2=VIP > 3=TIEU CHUAN)",
+                    getPriorityLabelByRank(rank),
+                    rank);
                 return true;
             }
         }
@@ -185,15 +190,20 @@ static bool preemptOneStationIfNeeded(Station stations[], int n, PriorityQueue& 
     startOrderAtStation(victim_station, &promoted_order);
     preempt_flags[selected_index] = 1;
 
-    printf("\n\t\t\t\t\t\t[CHEN UU TIEN] Tram %d: don %d (uu tien %d) -> don %d (uu tien %d)",
+    int old_rank = getOrderPriorityRank(&preempted_order);
+    int new_rank = getOrderPriorityRank(&promoted_order);
+    printf("\n\t\t\t\t\t\t[CHEN UU TIEN] Tram %d: thay don %d (%s - muc %d) bang don %d (%s - muc %d)",
         victim_station->id,
         preempted_order.id,
-        getOrderPriorityRank(&preempted_order),
+        getPriorityLabelByRank(old_rank),
+        old_rank,
         promoted_order.id,
-        getOrderPriorityRank(&promoted_order));
-    printf(" [%s -> %s]",
-        getPriorityLabelByRank(getOrderPriorityRank(&preempted_order)),
-        getPriorityLabelByRank(getOrderPriorityRank(&promoted_order)));
+        getPriorityLabelByRank(new_rank),
+        new_rank);
+    printf(" (%s %s %s)",
+        getPriorityLabelByRank(new_rank),
+        getPriorityRelationText(new_rank, old_rank),
+        getPriorityLabelByRank(old_rank));
 
     return true;
 }
@@ -458,11 +468,12 @@ void runPackagingScenarioFromFile(OrderQueue* queue, const char* scenario_file) 
         // and keep state transitions readable during demos.
         while (scheduled_head != NULL && arrival_count < SCENARIO_BATCH_SIZE) {
             enqueueOrder(queue, scheduled_head->order);
-            printf("\n\t\t\t\t\t\t[Don moi] TG %s | Don %d | Uu tien %d (%s) | %s",
+            int rank = getPriorityLevelForDisplay(&scheduled_head->order);
+            printf("\n\t\t\t\t\t\t[Don moi] TG %s | Don %d | Uu tien: %s (muc %d) | %s",
                 scheduled_head->created_at,
                 scheduled_head->order.id,
-                getPriorityLevelForDisplay(&scheduled_head->order),
-                getPriorityLabelByRank(getPriorityLevelForDisplay(&scheduled_head->order)),
+                getPriorityLabelByRank(rank),
+                rank,
                 scheduled_head->order.customer_name);
 
             ScheduledOrderNode* old_head = scheduled_head;
