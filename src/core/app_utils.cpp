@@ -43,11 +43,11 @@ static void processSearchOrderById(OrderQueue* order_queue) {
 	scanf("%d", &search_order_id);
 	clearInputBuffer();
 
-	OrderNode* foundOrderNode = findOrderById(order_queue, search_order_id);
-	if (foundOrderNode != NULL) {
+	Order found_order;
+	if (findOrderByIdInFile("data/orders.txt", search_order_id, &found_order)) {
 		printf("\n\t\t\t\t\t\tTIM THAY DON HANG!\n");
 		printOrderHeader();
-		printSingleOrder(foundOrderNode->info);
+		printSingleOrder(found_order);
 	}
 	else {
 		printf("\n\t\t\t\t\t\tKHONG TIM THAY DON DAT HANG!\n");
@@ -61,7 +61,7 @@ static void printDuplicatePhoneSuggestions(CustomerList* customer_list, const ch
 
 	printf("\n\t\t\t\t\t\tCac SDT trung ten:");
 	while (node != NULL) {
-		if (strcmp(node->info.name, name) == 0) {
+		if (_stricmp(node->info.name, name) == 0) {
 			printf("\n\t\t\t\t\t\t%d. %s", index, node->info.phone);
 			index++;
 		}
@@ -91,7 +91,7 @@ static void processSearchCustomerByName(CustomerList* customer_list) {
 
 	node = customer_list->head;
 	while (node != NULL) {
-		if (strcmp(node->info.name, search_name) == 0) {
+		if (_stricmp(node->info.name, search_name) == 0) {
 			if (first_match == NULL) {
 				first_match = node;
 			}
@@ -132,7 +132,7 @@ static void processSearchCustomerByName(CustomerList* customer_list) {
 
 	node = customer_list->head;
 	while (node != NULL) {
-		if (strcmp(node->info.name, search_name) == 0 && strcmp(node->info.phone, phone) == 0) {
+		if (_stricmp(node->info.name, search_name) == 0 && strcmp(node->info.phone, phone) == 0) {
 			printf("\n\t\t\t\t\t\tTIM THAY KHACH HANG!\n");
 			printCustomerHeader();
 			printSingleCustomer(node->info);

@@ -157,6 +157,7 @@ void deleteCustomer(CustomerList* customer_list);
 
 // Search & Sort
 OrderNode* findOrderById(OrderQueue* q, int id);
+int findOrderByIdInFile(const char* filename, int id, Order* out_order);
 CustomerNode* findCustomerByName(CustomerList* l, const char* name);
 int findProductById(Product inv[], int count, int id);
 

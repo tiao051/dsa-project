@@ -29,6 +29,54 @@ OrderNode* findOrderById(OrderQueue* q, int id) {
     return NULL;
 }
 
+int findOrderByIdInFile(const char* filename, int id, Order* out_order) {
+    if (filename == NULL || out_order == NULL) return 0;
+
+    FILE* file_ptr = fopen(filename, "rt");
+    if (file_ptr == NULL) return 0;
+
+    int count = 0;
+    if (fscanf(file_ptr, "%d\n", &count) != 1 || count <= 0) {
+        fclose(file_ptr);
+        return 0;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof(line), file_ptr) != NULL) {
+        Order order;
+        int priority = 0;
+        int shipping_method = 0;
+
+        int parsed = sscanf(line, "%d,%99[^,],%99[^,],%d,%lld,%d,%d,%99[^\n]",
+            &order.id,
+            order.customer_name,
+            order.product_name,
+            &order.quantity,
+            &order.price,
+            &priority,
+            &shipping_method,
+            order.status);
+
+        if (parsed != 8) {
+            continue;
+        }
+
+        if (order.id == id) {
+            order.priority = (PriorityLevel)priority;
+            order.shipping_method = (ShippingMethod)shipping_method;
+            trimString(order.customer_name);
+            trimString(order.product_name);
+            trimString(order.status);
+            *out_order = order;
+            fclose(file_ptr);
+            return 1;
+        }
+    }
+
+    fclose(file_ptr);
+    return 0;
+}
+
 /**
  * Search for a customer in the linked list by name
  * @return Pointer to CustomerNode if found, NULL otherwise
@@ -38,8 +86,7 @@ CustomerNode* findCustomerByName(CustomerList* l, const char* name) {
 
     CustomerNode* current = l->head;
     while (current != NULL) {
-        // Use strcmp for case-sensitive string comparison
-        if (strcmp(current->info.name, name) == 0) {
+        if (_stricmp(current->info.name, name) == 0) {
             return current;
         }
         current = current->next;
