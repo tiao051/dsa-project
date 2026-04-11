@@ -156,6 +156,7 @@ void saveCustomerFile(const char* filename, CustomerList* list, int count);
 
 // Customer operations
 void deleteCustomer(CustomerList* customer_list);
+void viewCustomerPurchaseHistory(CustomerList* customer_list);
 
 // Search & Sort
 OrderNode* findOrderById(OrderQueue* q, int id);

@@ -308,7 +308,7 @@ void processCustomer(CustomerList* customer_list) {
 	do {
 		system("cls");
 		menuCustomer();
-		choice = readMenuChoiceInRange(0, 4);
+		choice = readMenuChoiceInRange(0, 5);
 		switch (choice) {
 		case 1:
 			setColor(7);
@@ -328,6 +328,11 @@ void processCustomer(CustomerList* customer_list) {
 		case 4:
 			setColor(7);
 			deleteCustomer(customer_list);
+			pause();
+			break;
+		case 5:
+			setColor(7);
+			viewCustomerPurchaseHistory(customer_list);
 			pause();
 			break;
 		case 0:

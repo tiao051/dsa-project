@@ -151,6 +151,12 @@ void processCompletedOrder(const Order* order) {
 
 	Order completed_order = *order;
 	strcpy(completed_order.status, "Hoan thanh");
+
+	CustomerNode* customer_node = findCustomerByName(&customer_list, order->customer_name);
+	if (customer_node != NULL) {
+		appendOrderTail(&customer_node->info.history, &completed_order);
+	}
+
 	appendOrderTail(&completed_history_queue, &completed_order);
 }
 

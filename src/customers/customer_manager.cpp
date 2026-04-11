@@ -255,6 +255,73 @@ void displayCustomerList(CustomerList* customer_list) {
 	printf("\t\t\t-------------------------------------------------------------------------------------------------\n");
 }
 
+void viewCustomerPurchaseHistory(CustomerList* customer_list) {
+	if (customer_list == NULL || customer_list->head == NULL) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Danh sach khach hang trong!");
+		setColor(7);
+		return;
+	}
+
+	char customer_name[100];
+	printf("\n\t\t\t\t\t\tNhap ten khach hang can xem lich su: ");
+	fgets(customer_name, sizeof(customer_name), stdin);
+	customer_name[strcspn(customer_name, "\n")] = '\0';
+	trimString(customer_name);
+
+	if (strlen(customer_name) == 0) {
+		showErrorMessage("[!] Ten khach hang khong duoc de trong!");
+		return;
+	}
+
+	CustomerNode* customer_node = findCustomerByName(customer_list, customer_name);
+	if (customer_node == NULL) {
+		setColor(4);
+		printf("\n\t\t\t\t\t\t[!] Khong tim thay khach hang ten: %s", customer_name);
+		setColor(7);
+		return;
+	}
+
+	int same_name_count = countCustomersByName(customer_list, customer_name);
+	if (same_name_count > 1) {
+		char phone[32];
+		setColor(3);
+		printf("\n\t\t\t\t\t\t[!] Co %d khach hang trung ten. Vui long nhap them so dien thoai.", same_name_count);
+		setColor(7);
+		printDuplicatePhoneSuggestions(customer_list, customer_name);
+		readValidCustomerPhone(phone, sizeof(phone));
+
+		customer_node = findCustomerByNameAndPhone(customer_list, customer_name, phone);
+		if (customer_node == NULL) {
+			setColor(4);
+			printf("\n\t\t\t\t\t\t[!] Khong tim thay khach hang voi ten '%s' va SDT '%s'", customer_name, phone);
+			setColor(7);
+			return;
+		}
+	}
+
+	OrderQueue* history = &customer_node->info.history;
+	printf("\n\t\t\t\t\t\tLICH SU DON HANG CUA KHACH: %s", customer_node->info.name);
+	if (history->head == NULL) {
+		setColor(3);
+		printf("\n\t\t\t\t\t\tKhach hang nay chua co lich su mua hang.");
+		setColor(7);
+		return;
+	}
+
+	printf("\n\t\t============================= LICH SU MUA HANG =============================\n");
+	printOrderHeader();
+
+	int order_count = 0;
+	for (OrderNode* node = history->head; node != NULL; node = node->next) {
+		printSingleOrder(node->info);
+		order_count++;
+	}
+
+	printf("\t\t=============================================================================\n");
+	printf("\n\t\t\t\t\t\tTong don da mua: %d", order_count);
+}
+
 // Auto-upgrade customer tier
 void autoUpgradeCustomerTier(CustomerList* customer_list, int show_log) {
 	int count = 0;

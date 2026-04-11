@@ -6,16 +6,70 @@
 static std::atomic<bool> g_background_processing_running(false);
 static std::mutex g_background_order_mutex;
 
-static OrderNode* findOrderNodeById(OrderQueue* q, int id) {
-	if (q == NULL) return NULL;
+typedef struct BackgroundStationState {
+	int occupied;
+	Order order;
+	int phase;
+	int seconds_remaining;
+} BackgroundStationState;
+
+static BackgroundStationState g_background_stations[PACKING_STATION_COUNT];
+
+static void clearOrderQueueNodesRuntime(OrderQueue* q) {
+	if (q == NULL) return;
+
 	OrderNode* node = q->head;
 	while (node != NULL) {
-		if (node->info.id == id) {
-			return node;
-		}
-		node = node->next;
+		OrderNode* next = node->next;
+		delete node;
+		node = next;
 	}
-	return NULL;
+
+	q->head = NULL;
+	q->tail = NULL;
+}
+
+static int appendOrderTailRuntime(OrderQueue* q, const Order* order) {
+	if (q == NULL || order == NULL) return 0;
+
+	OrderNode* node = createOrderNode(*order);
+	if (node == NULL) return 0;
+
+	if (q->head == NULL) {
+		q->head = q->tail = node;
+	}
+	else {
+		q->tail->next = node;
+		q->tail = node;
+	}
+
+	return 1;
+}
+
+static void initBackgroundStations() {
+	for (int i = 0; i < PACKING_STATION_COUNT; i++) {
+		g_background_stations[i].occupied = 0;
+		g_background_stations[i].phase = 0;
+		g_background_stations[i].seconds_remaining = 0;
+	}
+}
+
+static void saveOrderStateSnapshotLocked(OrderQueue* pending_queue) {
+	OrderQueue snapshot;
+	initOrderQueue(&snapshot);
+
+	for (OrderNode* node = pending_queue->head; node != NULL; node = node->next) {
+		appendOrderTailRuntime(&snapshot, &node->info);
+	}
+
+	for (int i = 0; i < PACKING_STATION_COUNT; i++) {
+		if (g_background_stations[i].occupied) {
+			appendOrderTailRuntime(&snapshot, &g_background_stations[i].order);
+		}
+	}
+
+	saveOrderQueueWithHistory("data/orders.txt", &snapshot);
+	clearOrderQueueNodesRuntime(&snapshot);
 }
 
 static int removeOrderById(OrderQueue* q, int id, Order* out_order) {
@@ -55,6 +109,20 @@ static void sleepPhaseSeconds(int seconds) {
 	if (seconds > 0) {
 		Sleep(seconds * 1000);
 	}
+}
+
+static int dequeueOrderHeadRuntime(OrderQueue* q, Order* out_order) {
+	if (q == NULL || q->head == NULL || out_order == NULL) return 0;
+
+	OrderNode* node = q->head;
+	*out_order = node->info;
+	q->head = node->next;
+	if (q->head == NULL) {
+		q->tail = NULL;
+	}
+
+	delete node;
+	return 1;
 }
 
 static const char* getPriorityText(PriorityLevel priority) {
@@ -310,7 +378,7 @@ int insertOrderManual(OrderQueue* q) {
 	{
 		std::lock_guard<std::mutex> guard(g_background_order_mutex);
 		if (enqueueOrder(q, order)) {
-			saveOrderQueueWithHistory("data/orders.txt", q);
+			saveOrderStateSnapshotLocked(q);
 			printf("\n\t\t\t\t\t\t-> THEM DON HANG THANH CONG!!!!\n");
 			created_success = 1;
 		}
@@ -328,57 +396,63 @@ static void backgroundProcessOrders(OrderQueue* q) {
 		return;
 	}
 
+	initBackgroundStations();
+
 	while (1) {
-		int active_order_id = 0;
+		int has_active_station = 0;
 
 		{
 			std::lock_guard<std::mutex> guard(g_background_order_mutex);
-			if (isOrderQueueEmpty(q)) {
+
+			for (int i = 0; i < PACKING_STATION_COUNT; i++) {
+				if (!g_background_stations[i].occupied) {
+					Order next_order;
+					if (dequeueOrderHeadRuntime(q, &next_order)) {
+						g_background_stations[i].occupied = 1;
+						g_background_stations[i].order = next_order;
+						g_background_stations[i].phase = 1;
+						g_background_stations[i].seconds_remaining = 3;
+						strcpy(g_background_stations[i].order.status, "Dang xac nhan");
+					}
+				}
+			}
+
+			for (int i = 0; i < PACKING_STATION_COUNT; i++) {
+				if (g_background_stations[i].occupied) {
+					has_active_station = 1;
+					g_background_stations[i].seconds_remaining--;
+
+					if (g_background_stations[i].seconds_remaining <= 0) {
+						if (g_background_stations[i].phase == 1) {
+							g_background_stations[i].phase = 2;
+							g_background_stations[i].seconds_remaining = 3;
+							strcpy(g_background_stations[i].order.status, "Dang dong goi");
+						}
+						else if (g_background_stations[i].phase == 2) {
+							g_background_stations[i].phase = 3;
+							g_background_stations[i].seconds_remaining = 3;
+							strcpy(g_background_stations[i].order.status, "Dang van chuyen");
+						}
+						else {
+							Order completed_order = g_background_stations[i].order;
+							strcpy(completed_order.status, "Hoan thanh");
+							processCompletedOrder(&completed_order);
+							g_background_stations[i].occupied = 0;
+							g_background_stations[i].phase = 0;
+							g_background_stations[i].seconds_remaining = 0;
+						}
+					}
+				}
+			}
+
+			saveOrderStateSnapshotLocked(q);
+
+			if (isOrderQueueEmpty(q) && !has_active_station) {
 				break;
 			}
-
-			active_order_id = q->head->info.id;
-			strcpy(q->head->info.status, "Dang xac nhan");
-			saveOrderQueueWithHistory("data/orders.txt", q);
 		}
 
-		sleepPhaseSeconds(3);
-
-		{
-			std::lock_guard<std::mutex> guard(g_background_order_mutex);
-			OrderNode* node = findOrderNodeById(q, active_order_id);
-			if (node == NULL) {
-				continue;
-			}
-			strcpy(node->info.status, "Dang dong goi");
-			saveOrderQueueWithHistory("data/orders.txt", q);
-		}
-
-		sleepPhaseSeconds(3);
-
-		{
-			std::lock_guard<std::mutex> guard(g_background_order_mutex);
-			OrderNode* node = findOrderNodeById(q, active_order_id);
-			if (node == NULL) {
-				continue;
-			}
-			strcpy(node->info.status, "Dang van chuyen");
-			saveOrderQueueWithHistory("data/orders.txt", q);
-		}
-
-		sleepPhaseSeconds(3);
-
-		{
-			std::lock_guard<std::mutex> guard(g_background_order_mutex);
-			Order completed_order;
-			if (!removeOrderById(q, active_order_id, &completed_order)) {
-				continue;
-			}
-
-			strcpy(completed_order.status, "Hoan thanh");
-			processCompletedOrder(&completed_order);
-			saveOrderQueueWithHistory("data/orders.txt", q);
-		}
+		sleepPhaseSeconds(1);
 	}
 
 	g_background_processing_running = false;
@@ -404,12 +478,22 @@ int cancelOrderByIdSafe(OrderQueue* q, int order_id) {
 
 	std::lock_guard<std::mutex> guard(g_background_order_mutex);
 	Order removed_order;
-	if (!removeOrderById(q, order_id, &removed_order)) {
-		return 0;
+	if (removeOrderById(q, order_id, &removed_order)) {
+		saveOrderStateSnapshotLocked(q);
+		return 1;
 	}
 
-	saveOrderQueueWithHistory("data/orders.txt", q);
-	return 1;
+	for (int i = 0; i < PACKING_STATION_COUNT; i++) {
+		if (g_background_stations[i].occupied && g_background_stations[i].order.id == order_id) {
+			g_background_stations[i].occupied = 0;
+			g_background_stations[i].phase = 0;
+			g_background_stations[i].seconds_remaining = 0;
+			saveOrderStateSnapshotLocked(q);
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 // Print single order
