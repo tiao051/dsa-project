@@ -55,27 +55,11 @@ static void processSearchOrderById(OrderQueue* order_queue) {
 	pause();
 }
 
-static void printDuplicatePhoneSuggestions(CustomerList* customer_list, const char* name) {
-	CustomerNode* node = customer_list->head;
-	int index = 1;
-
-	printf("\n\t\t\t\t\t\tCac SDT trung ten:");
-	while (node != NULL) {
-		if (_stricmp(node->info.name, name) == 0) {
-			printf("\n\t\t\t\t\t\t%d. %s", index, node->info.phone);
-			index++;
-		}
-		node = node->next;
-	}
-	printf("\n");
-}
-
 static void processSearchCustomerByName(CustomerList* customer_list) {
+	(void)customer_list;
+
 	char search_name[100];
-	char phone[32];
 	int matched_count = 0;
-	CustomerNode* first_match = NULL;
-	CustomerNode* node = NULL;
 
 	setColor(7);
 	printf("\n\t\t\t\t\t\tNHAP TEN KHACH HANG: ");
@@ -89,60 +73,60 @@ static void processSearchCustomerByName(CustomerList* customer_list) {
 		return;
 	}
 
-	node = customer_list->head;
-	while (node != NULL) {
-		if (_stricmp(node->info.name, search_name) == 0) {
-			if (first_match == NULL) {
-				first_match = node;
-			}
+	FILE* file_ptr = fopen("data/orders.txt", "rt");
+	if (file_ptr == NULL) {
+		showErrorMessage("[!] Khong tim thay file du lieu don hang!");
+		pause();
+		return;
+	}
+
+	int total = 0;
+	fscanf(file_ptr, "%d\n", &total);
+
+	char line[512];
+	printf("\n\t\t\t\t\t\tKET QUA TIM KIEM DON HANG THEO TEN KHACH: %s\n", search_name);
+	printOrderHeader();
+
+	while (fgets(line, sizeof(line), file_ptr) != NULL) {
+		Order order;
+		int priority = 0;
+		int shipping_method = 0;
+
+		int parsed = sscanf(line, "%d,%99[^,],%99[^,],%d,%lld,%d,%d,%99[^\n]",
+			&order.id,
+			order.customer_name,
+			order.product_name,
+			&order.quantity,
+			&order.price,
+			&priority,
+			&shipping_method,
+			order.status);
+
+		if (parsed != 8) {
+			continue;
+		}
+
+		order.priority = (PriorityLevel)priority;
+		order.shipping_method = (ShippingMethod)shipping_method;
+		trimString(order.customer_name);
+		trimString(order.product_name);
+		trimString(order.status);
+
+		if (_stricmp(order.customer_name, search_name) == 0) {
+			printSingleOrder(order);
 			matched_count++;
 		}
-		node = node->next;
 	}
+
+	fclose(file_ptr);
 
 	if (matched_count == 0) {
-		printf("\n\t\t\t\t\t\tKHONG TIM THAY KHACH HANG!\n");
-		pause();
-		return;
+		printf("\n\t\t\t\t\t\tKHONG TIM THAY DON HANG CUA KHACH '%s'!\n", search_name);
+	}
+	else {
+		printf("\n\t\t\t\t\t\tTong don tim thay: %d\n", matched_count);
 	}
 
-	if (matched_count == 1) {
-		printf("\n\t\t\t\t\t\tTIM THAY KHACH HANG!\n");
-		printCustomerHeader();
-		printSingleCustomer(first_match->info);
-		pause();
-		return;
-	}
-
-	setColor(3);
-	printf("\n\t\t\t\t\t\t[!] Co %d khach hang trung ten. Vui long nhap them so dien thoai.", matched_count);
-	setColor(7);
-	printDuplicatePhoneSuggestions(customer_list, search_name);
-
-	do {
-		printf("\n\t\t\t\t\t\tNhap vao so dien thoai: ");
-		fgets(phone, sizeof(phone), stdin);
-		phone[strcspn(phone, "\n")] = '\0';
-		trimString(phone);
-
-		if (!isNumeric(phone)) {
-			showErrorMessage("[!] So dien thoai khong hop le");
-		}
-	} while (!isNumeric(phone));
-
-	node = customer_list->head;
-	while (node != NULL) {
-		if (_stricmp(node->info.name, search_name) == 0 && strcmp(node->info.phone, phone) == 0) {
-			printf("\n\t\t\t\t\t\tTIM THAY KHACH HANG!\n");
-			printCustomerHeader();
-			printSingleCustomer(node->info);
-			pause();
-			return;
-		}
-		node = node->next;
-	}
-
-	printf("\n\t\t\t\t\t\tKHONG TIM THAY KHACH HANG voi ten '%s' va SDT '%s'!\n", search_name, phone);
 	pause();
 }
 
