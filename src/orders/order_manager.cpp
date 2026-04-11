@@ -157,6 +157,41 @@ static int readShippingMethod(ShippingMethod* out_shipping_method) {
 	return 0;
 }
 
+static void pollRuntimeCancelRequest(Station stations[], int station_count, OrderQueue* q) {
+	if (!_kbhit()) {
+		return;
+	}
+
+	int key = _getch();
+	if (key != 'c' && key != 'C') {
+		return;
+	}
+
+	int cancel_id = 0;
+	printf("\n\t\t\t\t\t\t[YEU CAU HUY] Nhap ma don can huy (Queue/Tram): ");
+	if (scanf("%d", &cancel_id) != 1) {
+		clearInputBuffer();
+		showErrorMessage("[!] Ma don khong hop le!");
+		return;
+	}
+	clearInputBuffer();
+
+	int cancel_result = cancelOrderInRuntimeFlow(stations, station_count, q, cancel_id);
+	if (cancel_result == 1) {
+		setColor(2);
+		printf("\n\t\t\t\t\t\tDa huy don %d trong Queue.", cancel_id);
+		setColor(7);
+	}
+	else if (cancel_result == 2) {
+		setColor(2);
+		printf("\n\t\t\t\t\t\tDa huy don %d dang xu ly tai tram.", cancel_id);
+		setColor(7);
+	}
+	else {
+		showErrorMessage("[!] Khong tim thay don de huy trong Queue hoac tram.");
+	}
+}
+
 // Create and input a new order with stock validation
 int insertOrderManual(OrderQueue* q) {
 	Order order;
@@ -362,6 +397,7 @@ void processParallelPackaging(OrderQueue* q) {
 
 	printf("\n\t\t\t\t\t\tSo tram dong goi cau hinh san: %d", station_count);
 	printf("\n\t\t\t\t\t\tMo phong theo tick (co preemption o phase XAC NHAN)");
+	printf("\n\t\t\t\t\t\tNhan C truoc moi nhip de huy don (ca Queue va dang xu ly).\n");
 	resetCompletedOrderHistory();
 	resetStationTickCounter();
 
@@ -371,6 +407,7 @@ void processParallelPackaging(OrderQueue* q) {
 	}
 
 	while (!isOrderQueueEmpty(q) || hasActiveStations(stations, station_count)) {
+		pollRuntimeCancelRequest(stations, station_count, q);
 		runOneTick(stations, station_count, *q);
 	}
 

@@ -230,7 +230,9 @@ void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 	}
 
 	clearCustomerList(list);
-	if (fscanf(file_ptr, "%d\n", count) != 1) {
+	// Header count can be stale/corrupted; parse all valid records from file instead.
+	char header_line[128];
+	if (fgets(header_line, sizeof(header_line), file_ptr) == NULL) {
 		*count = 0;
 		fclose(file_ptr);
 		return;
@@ -238,7 +240,7 @@ void loadCustomerFile(const char* filename, CustomerList* list, int* count) {
 
 	int loaded_count = 0;
 	char line[512];
-	while (loaded_count < *count && fgets(line, sizeof(line), file_ptr) != NULL) {
+	while (fgets(line, sizeof(line), file_ptr) != NULL) {
 		Customer customer;
 		char extra[256];
 		extra[0] = '\0';
@@ -403,13 +405,25 @@ void updateCustomerCountInFile(const char* filename) {
 		return;
 	}
 
-	// Read current count
 	int count = 0;
-	fscanf(file_ptr, "%d\n", &count);
+	char line[512];
+	if (fgets(line, sizeof(line), file_ptr) != NULL) {
+		while (fgets(line, sizeof(line), file_ptr) != NULL) {
+			char id[37], name[100], phone[100], status[100], extra[256];
+			int tier;
+			long long total;
+			extra[0] = '\0';
 
-	// Seek back to beginning and update count
+			int parsed = sscanf(line, "%36[^,],%99[^,],%99[^,],%d,%99[^,],%lld,%255[^\n]",
+				id, name, phone, &tier, status, &total, extra);
+			if (parsed >= 6) {
+				count++;
+			}
+		}
+	}
+
 	fseek(file_ptr, 0, SEEK_SET);
-	fprintf(file_ptr, "%d\n", count + 1);
+	fprintf(file_ptr, "%d\n", count);
 
 	fclose(file_ptr);
 }
@@ -421,15 +435,25 @@ void decreaseCustomerCountInFile(const char* filename) {
 		return;
 	}
 
-	// Read current count
 	int count = 0;
-	fscanf(file_ptr, "%d\n", &count);
+	char line[512];
+	if (fgets(line, sizeof(line), file_ptr) != NULL) {
+		while (fgets(line, sizeof(line), file_ptr) != NULL) {
+			char id[37], name[100], phone[100], status[100], extra[256];
+			int tier;
+			long long total;
+			extra[0] = '\0';
 
-	// Seek back to beginning and update count
-	fseek(file_ptr, 0, SEEK_SET);
-	if (count > 0) {
-		fprintf(file_ptr, "%d\n", count - 1);
+			int parsed = sscanf(line, "%36[^,],%99[^,],%99[^,],%d,%99[^,],%lld,%255[^\n]",
+				id, name, phone, &tier, status, &total, extra);
+			if (parsed >= 6) {
+				count++;
+			}
+		}
 	}
+
+	fseek(file_ptr, 0, SEEK_SET);
+	fprintf(file_ptr, "%d\n", count);
 
 	fclose(file_ptr);
 }

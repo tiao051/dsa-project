@@ -1,9 +1,2 @@
-8
-3004,KhachHang009,MAN HINH 24 INCH,1,2500000,1,1,Hoan thanh
-3003,KhachHang008,TAI NGHE BLUETOOTH,1,300000,2,0,Hoan thanh
-3006,KhachHang011,RAM 8GB DDR4,1,700000,1,1,Hoan thanh
-3007,KhachHang013,CHUOT GAMING,1,350000,2,0,Hoan thanh
-3005,KhachHang010,CAP SAC TYPE C,2,80000,3,0,Hoan thanh
-3001,KhachHang004,BAN PHIM,1,95000,3,0,Hoan thanh
-3008,KhachHang016,USB 32GB,1,90000,3,0,Hoan thanh
-3002,KhachHang006,CHUOT MAY TINH,1,120000,3,0,Hoan thanh
+1
+101,minh tho,ban phim,1,95000,1,1,Cho dong goi

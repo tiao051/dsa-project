@@ -19,11 +19,39 @@ void generateNextCustomerId(char* id) {
 		return;
 	}
 
-	int count = 0;
-	fscanf(file_ptr, "%d\n", &count);
+	char line[512];
+	int maxId = 100;
+
+	// Skip header line (stored count) and compute next ID from actual records.
+	if (fgets(line, sizeof(line), file_ptr) == NULL) {
+		fclose(file_ptr);
+		sprintf(id, "101");
+		return;
+	}
+
+	while (fgets(line, sizeof(line), file_ptr) != NULL) {
+		char idText[37];
+		if (sscanf(line, "%36[^,]", idText) == 1) {
+			trimString(idText);
+			int validNumber = (idText[0] != '\0');
+			for (int i = 0; idText[i] != '\0'; i++) {
+				if (!isdigit((unsigned char)idText[i])) {
+					validNumber = 0;
+					break;
+				}
+			}
+
+			if (validNumber) {
+				int value = atoi(idText);
+				if (value > maxId) {
+					maxId = value;
+				}
+			}
+		}
+	}
 	fclose(file_ptr);
 
-	int nextId = 100 + count + 1;
+	int nextId = maxId + 1;
 	sprintf(id, "%d", nextId);
 }
 

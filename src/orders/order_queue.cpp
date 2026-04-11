@@ -104,8 +104,18 @@ void processCompletedOrder(const Order* order) {
 
 	for (int i = 0; i < product_count; i++) {
 		if (_stricmp(inventory[i].name, order->product_name) == 0) {
-			inventory[i].stock_quantity -= order->quantity;
-			inventory[i].sold_quantity += order->quantity;
+			int deducted_quantity = order->quantity;
+			if (deducted_quantity > inventory[i].stock_quantity) {
+				printf("\n\t\t\t\t\t\t[CANH BAO] Don %d vuot ton kho %s (ton=%d, don=%d).",
+					order->id,
+					inventory[i].name,
+					inventory[i].stock_quantity,
+					order->quantity);
+				deducted_quantity = inventory[i].stock_quantity;
+			}
+
+			inventory[i].stock_quantity -= deducted_quantity;
+			inventory[i].sold_quantity += deducted_quantity;
 			break;
 		}
 	}

@@ -30,6 +30,7 @@ void initStation(Station* station, int id);
 bool hasActiveStations(const Station stations[], int n);
 void resetStationTickCounter();
 void runOneTick(Station stations[], int n, PriorityQueue& queue);
+int cancelOrderInRuntimeFlow(Station stations[], int n, PriorityQueue* queue, int order_id);
 void runPackagingScenarioFromFile(OrderQueue* queue, const char* scenario_file);
 
 #endif

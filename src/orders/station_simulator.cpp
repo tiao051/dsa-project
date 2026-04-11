@@ -1,9 +1,9 @@
 #include "../../include/station_simulator.h"
 
 // Phase durations are modeled in seconds to make logs/demo timing intuitive.
-static const int PHASE_CONFIRM_TICKS = 10;
-static const int PHASE_PACK_TICKS = 10;
-static const int PHASE_SHIP_TICKS = 5;
+static const int PHASE_CONFIRM_TICKS = 3;
+static const int PHASE_PACK_TICKS = 3;
+static const int PHASE_SHIP_TICKS = 3;
 // Keep 1 second per tick so phase timing maps directly to real-time expectation.
 static const int TICK_DURATION_MS = 1000;
 // Scenario mode injects orders in small batches to make preemption moments visible.
@@ -33,6 +33,77 @@ static int getQueueSize(const PriorityQueue& queue) {
     return count;
 }
 
+static int getProductIndexByNameRuntime(const char* product_name) {
+    if (product_name == NULL) return -1;
+
+    for (int i = 0; i < product_count; i++) {
+        if (_stricmp(inventory[i].name, product_name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static int getReservedQuantityInPendingQueue(const PriorityQueue& queue, const char* product_name) {
+    int reserved = 0;
+    for (OrderNode* node = queue.head; node != NULL; node = node->next) {
+        if (_stricmp(node->info.product_name, product_name) == 0) {
+            reserved += node->info.quantity;
+        }
+    }
+    return reserved;
+}
+
+static int getReservedQuantityInActiveStations(const Station stations[], int n, const char* product_name) {
+    int reserved = 0;
+    for (int i = 0; i < n; i++) {
+        if (stations[i].currentOrder == NULL) {
+            continue;
+        }
+
+        if (_stricmp(stations[i].currentOrder->product_name, product_name) == 0) {
+            reserved += stations[i].currentOrder->quantity;
+        }
+    }
+    return reserved;
+}
+
+// Return value:
+//  1  -> enough stock to accept this order into runtime flow
+//  0  -> product does not exist in current inventory
+// -1  -> product exists but insufficient stock (including runtime reservations)
+static int validateScenarioOrderStock(
+    const Station stations[],
+    int n,
+    const PriorityQueue& queue,
+    const Order* order,
+    int* out_available_stock
+) {
+    if (order == NULL) return 0;
+
+    int product_index = getProductIndexByNameRuntime(order->product_name);
+    if (product_index < 0) {
+        if (out_available_stock != NULL) {
+            *out_available_stock = -1;
+        }
+        return 0;
+    }
+
+    int pending_reserved = getReservedQuantityInPendingQueue(queue, order->product_name);
+    int active_reserved = getReservedQuantityInActiveStations(stations, n, order->product_name);
+    int available_stock = inventory[product_index].stock_quantity - pending_reserved - active_reserved;
+
+    if (out_available_stock != NULL) {
+        *out_available_stock = available_stock;
+    }
+
+    if (available_stock < order->quantity) {
+        return -1;
+    }
+
+    return 1;
+}
+
 static const char* getPriorityLabelByRank(int rank) {
     if (rank == 1) return "HOA TOC";
     if (rank == 2) return "VIP";
@@ -59,6 +130,61 @@ static bool dequeuePriorityOrder(PriorityQueue& queue, Order* out_order) {
     *out_order = node->info;
     delete node;
     return true;
+}
+
+static bool removePendingOrderByIdNoPersist(PriorityQueue& queue, int order_id) {
+    OrderNode* prev = NULL;
+    OrderNode* current = queue.head;
+
+    while (current != NULL) {
+        if (current->info.id == order_id) {
+            if (prev == NULL) {
+                queue.head = current->next;
+            }
+            else {
+                prev->next = current->next;
+            }
+
+            if (current == queue.tail) {
+                queue.tail = prev;
+            }
+
+            delete current;
+            return true;
+        }
+
+        prev = current;
+        current = current->next;
+    }
+
+    return false;
+}
+
+int cancelOrderInRuntimeFlow(Station stations[], int n, PriorityQueue* queue, int order_id) {
+    if (stations == NULL || queue == NULL || order_id <= 0) {
+        return 0;
+    }
+
+    if (removePendingOrderByIdNoPersist(*queue, order_id)) {
+        return 1;
+    }
+
+    for (int i = 0; i < n; i++) {
+        Station* station = &stations[i];
+        if (station->currentOrder == NULL) {
+            continue;
+        }
+
+        if (station->currentOrder->id == order_id) {
+            delete station->currentOrder;
+            station->currentOrder = NULL;
+            station->currentPhase = STATION_PHASE_IDLE;
+            station->ticksRemaining = 0;
+            return 2;
+        }
+    }
+
+    return 0;
 }
 
 static void startOrderAtStation(Station* station, const Order* order) {
@@ -450,6 +576,7 @@ void runPackagingScenarioFromFile(OrderQueue* queue, const char* scenario_file) 
     printf("\n\t\t\t\t\t\tChay kich ban tu file: %s", scenario_file);
     printf("\n\t\t\t\t\t\tDa nap %d don, sap theo thoi gian tang dan", loaded);
     printf("\n\t\t\t\t\t\tMoi nhip dua toi da %d don vao he thong", SCENARIO_BATCH_SIZE);
+    printf("\n\t\t\t\t\t\tNhan C truoc moi nhip de huy don (ca Queue va dang xu ly).");
     setColor(7);
 
     Station stations[PACKING_STATION_COUNT];
@@ -467,23 +594,72 @@ void runPackagingScenarioFromFile(OrderQueue* queue, const char* scenario_file) 
         // Feed a bounded number of new orders each tick to emulate a live stream
         // and keep state transitions readable during demos.
         while (scheduled_head != NULL && arrival_count < SCENARIO_BATCH_SIZE) {
-            enqueueOrder(queue, scheduled_head->order);
-            int rank = getPriorityLevelForDisplay(&scheduled_head->order);
-            printf("\n\t\t\t\t\t\t[Don moi] TG %s | Don %d | Uu tien: %s (muc %d) | %s",
-                scheduled_head->created_at,
-                scheduled_head->order.id,
-                getPriorityLabelByRank(rank),
-                rank,
-                scheduled_head->order.customer_name);
+            int available_stock = 0;
+            int stock_validation = validateScenarioOrderStock(stations, station_count, *queue, &scheduled_head->order, &available_stock);
+
+            if (stock_validation == 1) {
+                enqueueOrder(queue, scheduled_head->order);
+                int rank = getPriorityLevelForDisplay(&scheduled_head->order);
+                printf("\n\t\t\t\t\t\t[Don moi] TG %s | Don %d | Uu tien: %s (muc %d) | %s",
+                    scheduled_head->created_at,
+                    scheduled_head->order.id,
+                    getPriorityLabelByRank(rank),
+                    rank,
+                    scheduled_head->order.customer_name);
+                arrival_count++;
+            }
+            else if (stock_validation == 0) {
+                setColor(4);
+                printf("\n\t\t\t\t\t\t[TU CHOI KICH BAN] Don %d bi bo qua: khong tim thay san pham %s trong kho.",
+                    scheduled_head->order.id,
+                    scheduled_head->order.product_name);
+                setColor(7);
+            }
+            else {
+                setColor(4);
+                printf("\n\t\t\t\t\t\t[TU CHOI KICH BAN] Don %d bi bo qua: ton kha dung con %d cho %s.",
+                    scheduled_head->order.id,
+                    available_stock,
+                    scheduled_head->order.product_name);
+                setColor(7);
+            }
 
             ScheduledOrderNode* old_head = scheduled_head;
             scheduled_head = scheduled_head->next;
             delete old_head;
-            arrival_count++;
         }
 
         if (arrival_count == 0) {
             printf("\n\t\t\t\t\t\t[Don moi] Khong co don moi");
+        }
+
+        if (_kbhit()) {
+            int key = _getch();
+            if (key == 'c' || key == 'C') {
+                int cancel_id = 0;
+                printf("\n\t\t\t\t\t\t[YEU CAU HUY] Nhap ma don can huy (Queue/Tram): ");
+                if (scanf("%d", &cancel_id) != 1) {
+                    clearInputBuffer();
+                    showErrorMessage("[!] Ma don khong hop le!");
+                }
+                else {
+                    clearInputBuffer();
+                    int cancel_result = cancelOrderInRuntimeFlow(stations, station_count, queue, cancel_id);
+                    if (cancel_result == 1) {
+                        setColor(2);
+                        printf("\n\t\t\t\t\t\tDa huy don %d trong Queue.", cancel_id);
+                        setColor(7);
+                    }
+                    else if (cancel_result == 2) {
+                        setColor(2);
+                        printf("\n\t\t\t\t\t\tDa huy don %d dang xu ly tai tram.", cancel_id);
+                        setColor(7);
+                    }
+                    else {
+                        showErrorMessage("[!] Khong tim thay don de huy trong Queue hoac tram.");
+                    }
+                }
+            }
         }
 
         runOneTick(stations, station_count, *queue);

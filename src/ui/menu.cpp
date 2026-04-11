@@ -62,7 +62,7 @@ void menuOrder() {
 	printf("\t\t\t\t\t\t|2. Theo doi tien do xu ly don hang                   |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|3. Xuat danh sach don hang                           |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|4. Chay kich ban uu tien tu file                     |\t\t\t\t\t\n");
-	printf("\t\t\t\t\t\t|5. Huy don dang cho trong Queue                      |\t\t\t\t\t\n");
+	printf("\t\t\t\t\t\t|5. Huy don hang				                      |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|6. Sao luu trang thai he thong                       |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|7. Phuc hoi trang thai he thong                      |\t\t\t\t\t\n");
 	printf("\t\t\t\t\t\t|0. Thoat                                             |\t\t\t\t\t\n");
