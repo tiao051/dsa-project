@@ -14,6 +14,81 @@ static void clearOrderQueueNodes(OrderQueue* q) {
 	q->tail = NULL;
 }
 
+static void clearCustomerListNodes(CustomerList* list) {
+	if (list == NULL) return;
+
+	CustomerNode* node = list->head;
+	while (node != NULL) {
+		CustomerNode* next = node->next;
+		delete node;
+		node = next;
+	}
+
+	list->head = NULL;
+	list->tail = NULL;
+}
+
+static int writeFileSection(FILE* backup_file, const char* section_name, const char* source_path) {
+	if (backup_file == NULL || section_name == NULL || source_path == NULL) return 0;
+
+	FILE* source = fopen(source_path, "rt");
+	if (source == NULL) {
+		return 0;
+	}
+
+	int line_count = 0;
+	char line[1024];
+	while (fgets(line, sizeof(line), source) != NULL) {
+		line_count++;
+	}
+
+	fseek(source, 0, SEEK_SET);
+	fprintf(backup_file, "SECTION,%s,%d\n", section_name, line_count);
+	while (fgets(line, sizeof(line), source) != NULL) {
+		fputs(line, backup_file);
+	}
+
+	fclose(source);
+	return 1;
+}
+
+static int restoreFileSection(FILE* backup_file, const char* expected_section_name, const char* target_path) {
+	if (backup_file == NULL || expected_section_name == NULL || target_path == NULL) return 0;
+
+	char header[256];
+	if (fgets(header, sizeof(header), backup_file) == NULL) {
+		return 0;
+	}
+
+	char section_name[64];
+	int line_count = 0;
+	if (sscanf(header, "SECTION,%63[^,],%d", section_name, &line_count) != 2 || line_count < 0) {
+		return 0;
+	}
+
+	trimString(section_name);
+	if (_stricmp(section_name, expected_section_name) != 0) {
+		return 0;
+	}
+
+	FILE* target = fopen(target_path, "wt");
+	if (target == NULL) {
+		return 0;
+	}
+
+	char line[1024];
+	for (int i = 0; i < line_count; i++) {
+		if (fgets(line, sizeof(line), backup_file) == NULL) {
+			fclose(target);
+			return 0;
+		}
+		fputs(line, target);
+	}
+
+	fclose(target);
+	return 1;
+}
+
 static int appendOrderTailRaw(OrderQueue* q, const Order* order) {
 	if (q == NULL || order == NULL) return 0;
 
@@ -50,34 +125,12 @@ int backupSystemState(const char* filename, Product inventory[], int product_cou
 		return 0;
 	}
 
-	fprintf(file_ptr, "BACKUP_V1\n");
-	fprintf(file_ptr, "INVENTORY,%d\n", product_count);
-	for (int i = 0; i < product_count; i++) {
-		fprintf(file_ptr, "%d,%s,%d,%lld,%d\n",
-			inventory[i].id,
-			inventory[i].name,
-			inventory[i].stock_quantity,
-			inventory[i].price,
-			inventory[i].sold_quantity);
-	}
-
-	int queue_count = 0;
-	for (OrderNode* node = q->head; node != NULL; node = node->next) {
-		queue_count++;
-	}
-
-	fprintf(file_ptr, "ORDERS,%d\n", queue_count);
-	for (OrderNode* node = q->head; node != NULL; node = node->next) {
-		Order* order = &node->info;
-		fprintf(file_ptr, "%d,%s,%s,%d,%lld,%d,%d,%s\n",
-			order->id,
-			order->customer_name,
-			order->product_name,
-			order->quantity,
-			order->price,
-			(int)order->priority,
-			(int)order->shipping_method,
-			order->status);
+	fprintf(file_ptr, "BACKUP_V2\n");
+	if (!writeFileSection(file_ptr, "INVENTORY", "data/inventory.txt") ||
+		!writeFileSection(file_ptr, "ORDERS", "data/orders.txt") ||
+		!writeFileSection(file_ptr, "CUSTOMERS", "data/customers.txt")) {
+		fclose(file_ptr);
+		return 0;
 	}
 
 	fclose(file_ptr);
@@ -100,110 +153,35 @@ int restoreSystemState(const char* filename, Product inventory[], int* product_c
 		return 0;
 	}
 	trimString(header);
-	if (strcmp(header, "BACKUP_V1") != 0) {
+	if (strcmp(header, "BACKUP_V2") != 0) {
 		fclose(file_ptr);
 		return 0;
 	}
 
-	char line[512];
-	if (fgets(line, sizeof(line), file_ptr) == NULL) {
-		fclose(file_ptr);
-		return 0;
-	}
-
-	int inv_count = 0;
-	if (sscanf(line, "INVENTORY,%d", &inv_count) != 1 || inv_count < 0 || inv_count > MAXSIZE) {
-		fclose(file_ptr);
-		return 0;
-	}
-
-	Product inventory_staging[MAXSIZE];
-	for (int i = 0; i < inv_count; i++) {
-		if (fgets(line, sizeof(line), file_ptr) == NULL) {
-			fclose(file_ptr);
-			return 0;
-		}
-
-		if (sscanf(line, "%d,%99[^,],%d,%lld,%d",
-			&inventory_staging[i].id,
-			inventory_staging[i].name,
-			&inventory_staging[i].stock_quantity,
-			&inventory_staging[i].price,
-			&inventory_staging[i].sold_quantity) != 5) {
-			fclose(file_ptr);
-			return 0;
-		}
-		trimString(inventory_staging[i].name);
-	}
-
-	if (fgets(line, sizeof(line), file_ptr) == NULL) {
-		fclose(file_ptr);
-		return 0;
-	}
-
-	int order_count = 0;
-	if (sscanf(line, "ORDERS,%d", &order_count) != 1 || order_count < 0) {
-		fclose(file_ptr);
-		return 0;
-	}
-
-	OrderQueue queue_staging;
-	queue_staging.head = NULL;
-	queue_staging.tail = NULL;
-	for (int i = 0; i < order_count; i++) {
-		if (fgets(line, sizeof(line), file_ptr) == NULL) {
-			clearOrderQueueNodes(&queue_staging);
-			fclose(file_ptr);
-			return 0;
-		}
-
-		Order order;
-		int priority = 0;
-		int shipping_method = 0;
-		if (sscanf(line, "%d,%99[^,],%99[^,],%d,%lld,%d,%d,%99[^\n]",
-			&order.id,
-			order.customer_name,
-			order.product_name,
-			&order.quantity,
-			&order.price,
-			&priority,
-			&shipping_method,
-			order.status) != 8) {
-			clearOrderQueueNodes(&queue_staging);
-			fclose(file_ptr);
-			return 0;
-		}
-
-		order.priority = (PriorityLevel)priority;
-		order.shipping_method = (ShippingMethod)shipping_method;
-		trimString(order.customer_name);
-		trimString(order.product_name);
-		trimString(order.status);
-
-		if (!appendOrderTailRaw(&queue_staging, &order)) {
-			clearOrderQueueNodes(&queue_staging);
-			fclose(file_ptr);
-			return 0;
-		}
-	}
+	int ok_inventory = restoreFileSection(file_ptr, "INVENTORY", "data/inventory.txt");
+	int ok_orders = restoreFileSection(file_ptr, "ORDERS", "data/orders.txt");
+	int ok_customers = restoreFileSection(file_ptr, "CUSTOMERS", "data/customers.txt");
 
 	fclose(file_ptr);
-
-	// Commit only after full parse success to avoid half-restored runtime state.
-	clearOrderQueueNodes(q);
-	copyOrderQueue(q, &queue_staging);
-	clearOrderQueueNodes(&queue_staging);
-	for (int i = 0; i < inv_count; i++) {
-		inventory[i] = inventory_staging[i];
+	if (!ok_inventory || !ok_orders || !ok_customers) {
+		return 0;
 	}
-	*product_count = inv_count;
 
-	saveInventoryToFile("data/inventory.txt", inventory, *product_count);
-	saveOrderQueueToFile("data/orders.txt", q);
+	// Reload runtime structures from restored files.
+	loadInventoryFile("data/inventory.txt", inventory, product_count);
+	loadOrderFile("data/orders.txt", q);
+	clearCustomerListNodes(&customer_list);
+	int restored_customer_count = 0;
+	loadCustomerFile("data/customers.txt", &customer_list, &restored_customer_count);
 	return 1;
 }
 
 void processBackupSystemState(Product inventory[], int product_count, OrderQueue* q) {
+	if (isBackgroundOrderProcessing()) {
+		showErrorMessage("[!] He thong dang xu ly don hang ngam. Vui long doi hoan tat roi backup.");
+		return;
+	}
+
 	if (backupSystemState("data/system_backup.txt", inventory, product_count, q)) {
 		setColor(2);
 		printf("\n\t\t\t\t\t\tSao luu he thong thanh cong -> data/system_backup.txt");
@@ -215,6 +193,11 @@ void processBackupSystemState(Product inventory[], int product_count, OrderQueue
 }
 
 void processRestoreSystemState(Product inventory[], int* product_count, OrderQueue* q) {
+	if (isBackgroundOrderProcessing()) {
+		showErrorMessage("[!] He thong dang xu ly don hang ngam. Vui long doi hoan tat roi restore.");
+		return;
+	}
+
 	if (restoreSystemState("data/system_backup.txt", inventory, product_count, q)) {
 		setColor(2);
 		printf("\n\t\t\t\t\t\tPhuc hoi he thong thanh cong tu data/system_backup.txt");
