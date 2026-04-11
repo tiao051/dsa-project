@@ -203,26 +203,6 @@ int restoreSystemState(const char* filename, Product inventory[], int* product_c
 	return 1;
 }
 
-void processCancelPendingOrder(OrderQueue* q) {
-	int cancel_id = 0;
-	printf("\n\t\t\t\t\t\tNhap ma don can huy: ");
-	if (scanf("%d", &cancel_id) != 1) {
-		clearInputBuffer();
-		showErrorMessage("[!] Ma don khong hop le!");
-		return;
-	}
-
-	clearInputBuffer();
-	if (cancelPendingOrderById(q, cancel_id)) {
-		setColor(2);
-		printf("\n\t\t\t\t\t\tDa huy don %d trong Queue thanh cong.", cancel_id);
-		setColor(7);
-	}
-	else {
-		showErrorMessage("[!] Khong tim thay don trong Queue de huy.");
-	}
-}
-
 void processBackupSystemState(Product inventory[], int product_count, OrderQueue* q) {
 	if (backupSystemState("data/system_backup.txt", inventory, product_count, q)) {
 		setColor(2);

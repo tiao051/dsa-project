@@ -49,6 +49,6 @@
 148,KhachHang048,0959698601,0,Khoa,0
 149,KhachHang049,0969705058,0,Khoa,0
 150,KhachHang050,0958342931,0,Khoa,0
-151,minh tho,0906756712,0,Hoat dong,950000
+151,minh tho,0906756712,0,Hoat dong,2185000
 101,minh tho,0128312354,0,HoatDong,0
 152,thu,0980123223,0,HoatDong,0

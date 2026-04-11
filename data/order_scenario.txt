@@ -3,7 +3,7 @@
 # Luong nap: moi tick nap 2 don theo timestamp tang dan
 # Dot 1: 2 don dau vao tram 1,2
 # Dot 2: 2 don tiep theo vao tram 3,4
-# Dot 3+: don moi vao khi full tram -> uu tien/preempt neu hop le (chi phase 1)
+# Dot 3+: don moi vao khi full tram -> uu tien neu hop le (chi phase 1)
 2026-04-01T09:00:00,3001,KhachHang004,BAN PHIM,1,95000,3
 2026-04-01T09:00:03,3002,KhachHang006,CHUOT MAY TINH,1,120000,3
 2026-04-01T09:00:10,3003,KhachHang008,TAI NGHE BLUETOOTH,1,300000,2

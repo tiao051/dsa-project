@@ -1,2 +1,4 @@
-1
-101,minh tho,ban phim,1,95000,1,1,Cho dong goi
+3
+104,minh tho,usb 32gb,1,90000,1,1,Hoan thanh
+105,minh tho,usb 32gb,1,90000,1,1,Hoan thanh
+103,minh tho,usb 32gb,1,90000,3,0,Hoan thanh

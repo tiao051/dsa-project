@@ -1,5 +1,61 @@
 #include "../../include/order_manager.h"
-#include "../../include/station_simulator.h"
+#include <thread>
+#include <atomic>
+#include <mutex>
+
+static std::atomic<bool> g_background_processing_running(false);
+static std::mutex g_background_order_mutex;
+
+static OrderNode* findOrderNodeById(OrderQueue* q, int id) {
+	if (q == NULL) return NULL;
+	OrderNode* node = q->head;
+	while (node != NULL) {
+		if (node->info.id == id) {
+			return node;
+		}
+		node = node->next;
+	}
+	return NULL;
+}
+
+static int removeOrderById(OrderQueue* q, int id, Order* out_order) {
+	if (q == NULL) return 0;
+
+	OrderNode* prev = NULL;
+	OrderNode* node = q->head;
+	while (node != NULL) {
+		if (node->info.id == id) {
+			if (out_order != NULL) {
+				*out_order = node->info;
+			}
+
+			if (prev == NULL) {
+				q->head = node->next;
+			}
+			else {
+				prev->next = node->next;
+			}
+
+			if (node == q->tail) {
+				q->tail = prev;
+			}
+
+			delete node;
+			return 1;
+		}
+
+		prev = node;
+		node = node->next;
+	}
+
+	return 0;
+}
+
+static void sleepPhaseSeconds(int seconds) {
+	if (seconds > 0) {
+		Sleep(seconds * 1000);
+	}
+}
 
 static const char* getPriorityText(PriorityLevel priority) {
 	if (priority == PRIORITY_EXPRESS) return "Express";
@@ -28,6 +84,8 @@ static int getProductIndexByName(const char* product_name) {
 }
 
 static int getReservedQuantityInQueue(OrderQueue* q, const char* product_name) {
+	std::lock_guard<std::mutex> guard(g_background_order_mutex);
+
 	int reserved = 0;
 	OrderNode* node = q->head;
 	while (node != NULL) {
@@ -40,7 +98,25 @@ static int getReservedQuantityInQueue(OrderQueue* q, const char* product_name) {
 }
 
 static int generateNextOrderId(OrderQueue* q) {
+	std::lock_guard<std::mutex> guard(g_background_order_mutex);
+
 	int max_id = 100;
+
+	FILE* file_ptr = fopen("data/orders.txt", "rt");
+	if (file_ptr != NULL) {
+		char line[512];
+		// Skip header count line.
+		if (fgets(line, sizeof(line), file_ptr) != NULL) {
+			while (fgets(line, sizeof(line), file_ptr) != NULL) {
+				int file_order_id = 0;
+				if (sscanf(line, "%d,", &file_order_id) == 1 && file_order_id > max_id) {
+					max_id = file_order_id;
+				}
+			}
+		}
+		fclose(file_ptr);
+	}
+
 	OrderNode* node = q->head;
 
 	while (node != NULL) {
@@ -157,41 +233,6 @@ static int readShippingMethod(ShippingMethod* out_shipping_method) {
 	return 0;
 }
 
-static void pollRuntimeCancelRequest(Station stations[], int station_count, OrderQueue* q) {
-	if (!_kbhit()) {
-		return;
-	}
-
-	int key = _getch();
-	if (key != 'c' && key != 'C') {
-		return;
-	}
-
-	int cancel_id = 0;
-	printf("\n\t\t\t\t\t\t[YEU CAU HUY] Nhap ma don can huy (Queue/Tram): ");
-	if (scanf("%d", &cancel_id) != 1) {
-		clearInputBuffer();
-		showErrorMessage("[!] Ma don khong hop le!");
-		return;
-	}
-	clearInputBuffer();
-
-	int cancel_result = cancelOrderInRuntimeFlow(stations, station_count, q, cancel_id);
-	if (cancel_result == 1) {
-		setColor(2);
-		printf("\n\t\t\t\t\t\tDa huy don %d trong Queue.", cancel_id);
-		setColor(7);
-	}
-	else if (cancel_result == 2) {
-		setColor(2);
-		printf("\n\t\t\t\t\t\tDa huy don %d dang xu ly tai tram.", cancel_id);
-		setColor(7);
-	}
-	else {
-		showErrorMessage("[!] Khong tim thay don de huy trong Queue hoac tram.");
-	}
-}
-
 // Create and input a new order with stock validation
 int insertOrderManual(OrderQueue* q) {
 	Order order;
@@ -266,16 +307,109 @@ int insertOrderManual(OrderQueue* q) {
 	printf("\n\t\t\t\t\t\tTrang thai: %s", order.status);
 	printf("\n\t\t\t\t\t\tDon gia ap dung: %lld", order.price);
 
-	if (enqueueOrder(q, order)) {
-		saveOrderQueueToFile("data/orders.txt", q);
-		printf("\n\t\t\t\t\t\t-> THEM DON HANG THANH CONG!!!!\n");
-		created_success = 1;
-	}
-	else {
-		showErrorMessage("[!] Khong the them don hang vao hang doi!");
+	{
+		std::lock_guard<std::mutex> guard(g_background_order_mutex);
+		if (enqueueOrder(q, order)) {
+			saveOrderQueueWithHistory("data/orders.txt", q);
+			printf("\n\t\t\t\t\t\t-> THEM DON HANG THANH CONG!!!!\n");
+			created_success = 1;
+		}
+		else {
+			showErrorMessage("[!] Khong the them don hang vao hang doi!");
+		}
 	}
 
 	return created_success;
+}
+
+static void backgroundProcessOrders(OrderQueue* q) {
+	if (q == NULL) {
+		g_background_processing_running = false;
+		return;
+	}
+
+	while (1) {
+		int active_order_id = 0;
+
+		{
+			std::lock_guard<std::mutex> guard(g_background_order_mutex);
+			if (isOrderQueueEmpty(q)) {
+				break;
+			}
+
+			active_order_id = q->head->info.id;
+			strcpy(q->head->info.status, "Dang xac nhan");
+			saveOrderQueueWithHistory("data/orders.txt", q);
+		}
+
+		sleepPhaseSeconds(3);
+
+		{
+			std::lock_guard<std::mutex> guard(g_background_order_mutex);
+			OrderNode* node = findOrderNodeById(q, active_order_id);
+			if (node == NULL) {
+				continue;
+			}
+			strcpy(node->info.status, "Dang dong goi");
+			saveOrderQueueWithHistory("data/orders.txt", q);
+		}
+
+		sleepPhaseSeconds(3);
+
+		{
+			std::lock_guard<std::mutex> guard(g_background_order_mutex);
+			OrderNode* node = findOrderNodeById(q, active_order_id);
+			if (node == NULL) {
+				continue;
+			}
+			strcpy(node->info.status, "Dang van chuyen");
+			saveOrderQueueWithHistory("data/orders.txt", q);
+		}
+
+		sleepPhaseSeconds(3);
+
+		{
+			std::lock_guard<std::mutex> guard(g_background_order_mutex);
+			Order completed_order;
+			if (!removeOrderById(q, active_order_id, &completed_order)) {
+				continue;
+			}
+
+			strcpy(completed_order.status, "Hoan thanh");
+			processCompletedOrder(&completed_order);
+			saveOrderQueueWithHistory("data/orders.txt", q);
+		}
+	}
+
+	g_background_processing_running = false;
+}
+
+void ensureBackgroundOrderProcessing(OrderQueue* q) {
+	if (q == NULL || isOrderQueueEmpty(q) || g_background_processing_running) {
+		return;
+	}
+
+	g_background_processing_running = true;
+	std::thread(backgroundProcessOrders, q).detach();
+}
+
+int isBackgroundOrderProcessing() {
+	return g_background_processing_running ? 1 : 0;
+}
+
+int cancelOrderByIdSafe(OrderQueue* q, int order_id) {
+	if (q == NULL || order_id <= 0) {
+		return 0;
+	}
+
+	std::lock_guard<std::mutex> guard(g_background_order_mutex);
+	Order removed_order;
+	if (!removeOrderById(q, order_id, &removed_order)) {
+		return 0;
+	}
+
+	saveOrderQueueWithHistory("data/orders.txt", q);
+	return 1;
 }
 
 // Print single order
@@ -293,20 +427,10 @@ void printSingleOrder(Order order) {
 		order.price);
 }
 
-// Display all orders in queue
-void displayOrderQueue(OrderQueue* q) {
-	printf("\t\t================================ DANH SACH DON HANG ================================\n");
-	printOrderHeader();
-	OrderNode* node = q->head;
-	while(node != NULL)
-	{
-		printSingleOrder(node->info);
-		node = node->next;
-	}
-	printf("\t\t====================================================================================\n");
-}
 
 void displayOrderProgressFromFile(const char* filename) {
+	std::lock_guard<std::mutex> guard(g_background_order_mutex);
+
 	FILE* file_ptr = fopen(filename, "rt");
 	if (file_ptr == NULL) {
 		setColor(4);
@@ -380,40 +504,3 @@ void displayOrderProgressFromFile(const char* filename) {
 		done_count);
 }
 
-void processParallelPackaging(OrderQueue* q) {
-	int station_count = PACKING_STATION_COUNT;
-
-	if (isOrderQueueEmpty(q)) {
-		setColor(4);
-		printf("\n\t\t\t\t\t\tKhong co don nao trong hang doi!");
-		setColor(7);
-		return;
-	}
-
-	if (station_count <= 0) {
-		showErrorMessage("[!] Cau hinh PACKING_STATION_COUNT khong hop le!");
-		return;
-	}
-
-	printf("\n\t\t\t\t\t\tSo tram dong goi cau hinh san: %d", station_count);
-	printf("\n\t\t\t\t\t\tMo phong theo tick (co preemption o phase XAC NHAN)");
-	printf("\n\t\t\t\t\t\tNhan C truoc moi nhip de huy don (ca Queue va dang xu ly).\n");
-	resetCompletedOrderHistory();
-	resetStationTickCounter();
-
-	Station stations[PACKING_STATION_COUNT];
-	for (int i = 0; i < station_count; i++) {
-		initStation(&stations[i], i + 1);
-	}
-
-	while (!isOrderQueueEmpty(q) || hasActiveStations(stations, station_count)) {
-		pollRuntimeCancelRequest(stations, station_count, q);
-		runOneTick(stations, station_count, *q);
-	}
-
-	saveOrderQueueWithHistory("data/orders.txt", q);
-
-	setColor(2);
-	printf("\n\n\t\t\t\t\t\tHOAN TAT DONG GOI THEO TICK!");
-	setColor(7);
-}

@@ -129,14 +129,15 @@ void trimString(char* str);
 // Core Operations - Order Queue
 int enqueueOrder(OrderQueue* q, Order x);
 int dequeueOrder(OrderQueue* q, Order* out_order);
-int cancelPendingOrderById(OrderQueue* q, int id);
 int getOrderPriorityRank(const Order* order);
 void processCompletedOrder(const Order* order);
 void resetCompletedOrderHistory();
 void saveOrderQueueWithHistory(const char* filename, OrderQueue* pending_queue);
 int insertOrderManual(OrderQueue* q);
+void ensureBackgroundOrderProcessing(OrderQueue* q);
+int isBackgroundOrderProcessing();
+int cancelOrderByIdSafe(OrderQueue* q, int order_id);
 void displayOrderProgressFromFile(const char* filename);
-void processParallelPackaging(OrderQueue* q);
 void runPackagingScenarioFromFile(OrderQueue* queue, const char* scenario_file);
 
 // Core Operations - Customer List
@@ -176,7 +177,6 @@ void displayInventory(Product inv[], int count);
 
 // Display
 void printSingleOrder(Order x);
-void displayOrderQueue(OrderQueue* q);
 void printSingleCustomer(Customer x);
 void displayCustomerList(CustomerList* l);
 
@@ -209,7 +209,6 @@ void reportExpressVsStandardRatio();
 void runQueueBenchmarkComparison();
 int backupSystemState(const char* filename, Product inventory[], int product_count, OrderQueue* q);
 int restoreSystemState(const char* filename, Product inventory[], int* product_count, OrderQueue* q);
-void processCancelPendingOrder(OrderQueue* q);
 void processBackupSystemState(Product inventory[], int product_count, OrderQueue* q);
 void processRestoreSystemState(Product inventory[], int* product_count, OrderQueue* q);
 void processSearchSort(OrderQueue* q, CustomerList* l);

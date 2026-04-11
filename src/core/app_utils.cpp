@@ -195,16 +195,13 @@ void processOrder(OrderQueue* q) {
 	do {
 		system("cls");
 		menuOrder();
-		choice = readMenuChoiceInRange(0, 7);
+		choice = readMenuChoiceInRange(0, 6);
 
 		switch (choice) {
 		case 1:
 			setColor(7);
 			if (insertOrderManual(q)) {
-				setColor(3);
-				printf("\n\t\t\t\t\t\tTu dong kich hoat dong goi don hang...\n");
-				setColor(7);
-				processParallelPackaging(q);
+				ensureBackgroundOrderProcessing(q);
 			}
 			pause();
 			break;
@@ -217,29 +214,46 @@ void processOrder(OrderQueue* q) {
 
 		case 3:
 			setColor(7);
-			displayOrderQueue(q);
+			if (isBackgroundOrderProcessing()) {
+				showErrorMessage("[!] He thong dang xu ly don hang ngam. Vui long doi hoan tat truoc khi chay kich ban.");
+			}
+			else {
+				runPackagingScenarioFromFile(q, "data/order_scenario.txt");
+			}
 			pause();
 			break;
 
 		case 4:
+		{
 			setColor(7);
-			runPackagingScenarioFromFile(q, "data/order_scenario.txt");
+			int cancel_id = 0;
+			printf("\n\t\t\t\t\t\tNhap ma don can huy: ");
+			if (scanf("%d", &cancel_id) != 1) {
+				clearInputBuffer();
+				showErrorMessage("[!] Ma don khong hop le!");
+			}
+			else {
+				clearInputBuffer();
+				if (cancelOrderByIdSafe(q, cancel_id)) {
+					setColor(2);
+					printf("\n\t\t\t\t\t\tDa huy don %d thanh cong.", cancel_id);
+					setColor(7);
+				}
+				else {
+					showErrorMessage("[!] Khong tim thay don de huy.");
+				}
+			}
 			pause();
 			break;
+		}
 
 		case 5:
-			setColor(7);
-			processCancelPendingOrder(q);
-			pause();
-			break;
-
-		case 6:
 			setColor(7);
 			processBackupSystemState(inventory, product_count, q);
 			pause();
 			break;
 
-		case 7:
+		case 6:
 			setColor(7);
 			processRestoreSystemState(inventory, &product_count, q);
 			pause();
