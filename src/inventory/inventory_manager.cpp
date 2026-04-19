@@ -21,9 +21,8 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 			continue;
 		}
 
-		// Kiểm tra trùng tên không phân biệt hoa thường trong toàn bộ mảng hiện tại.
-		// Dùng _stricmp (Windows) thay vì strcmp để tránh trường hợp "Táo" và "táo"
-		// được coi là hai sản phẩm khác nhau.
+		// Check for duplicate product name (case-insensitive) to prevent confusion in orders.
+		// Use _stricmp for case-insensitive comparison. If a duplicate is found, prompt the user to enter a different name.
 		bool exists = false;
 		for (int i = 0; i < *nSP; i++) {
 			if (_stricmp(inventory[i].name, inventory[*nSP].name) == 0) {
@@ -34,7 +33,7 @@ void createInventory(Product inventory[MAXSIZE], int* nSP) {
 
 		if (exists) {
 			setColor(4); printf("\t\t\t\t\t\t[!] SAN PHAM DA TON TAI TRONG KHO!\n"); setColor(7);
-			inventory[*nSP].name[0] = '\0'; // Xóa tên để vòng lặp do-while tiếp tục yêu cầu nhập lại
+			inventory[*nSP].name[0] = '\0'; // Clear the name to make the do-while loop prompt for re-entry
 		}
 	} while (strlen(inventory[*nSP].name) == 0);
 
