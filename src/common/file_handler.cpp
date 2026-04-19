@@ -359,7 +359,7 @@ void appendProductToFile(const char* filename, Product* product) {
 	updateProductCountInFile(filename);
 }
 
-// Generate next product ID based on product count from file
+// Generate next product ID by scanning for the actual max ID in the file
 void generateNextProductId(int* id) {
 	FILE* file_ptr = fopen("data/inventory.txt", "rt");
 	if (file_ptr == NULL) {
@@ -367,11 +367,17 @@ void generateNextProductId(int* id) {
 		return;
 	}
 
-	int count = 0;
-	fscanf(file_ptr, "%d\n", &count);
+	int maxId = 100;
+	char line[256];
+	fgets(line, sizeof(line), file_ptr); // skip count header
+	while (fgets(line, sizeof(line), file_ptr) != NULL) {
+		int pid = 0;
+		if (sscanf(line, "%d,", &pid) == 1 && pid > maxId)
+			maxId = pid;
+	}
 	fclose(file_ptr);
 
-	*id = 100 + count + 1;
+	*id = maxId + 1;
 }
 
 

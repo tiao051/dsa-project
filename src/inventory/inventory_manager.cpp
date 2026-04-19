@@ -235,6 +235,5 @@ void deleteProduct(Product inventory[MAXSIZE], int* product_count) {
 
 		// Save updated inventory to file
 		saveInventoryToFile("data/inventory.txt", inventory, *product_count);
-		decreaseProductCountInFile("data/inventory.txt");
 	}
 }

@@ -300,26 +300,54 @@ void viewCustomerPurchaseHistory(CustomerList* customer_list) {
 		}
 	}
 
-	OrderQueue* history = &customer_node->info.history;
 	printf("\n\t\t\t\t\t\tLICH SU DON HANG CUA KHACH: %s", customer_node->info.name);
-	if (history->head == NULL) {
-		setColor(3);
-		printf("\n\t\t\t\t\t\tKhach hang nay chua co lich su mua hang.");
-		setColor(7);
-		return;
-	}
-
 	printf("\n\t\t============================= LICH SU MUA HANG =============================\n");
 	printOrderHeader();
 
 	int order_count = 0;
-	for (OrderNode* node = history->head; node != NULL; node = node->next) {
+	const char* target_name = customer_node->info.name;
+
+	// Check in-memory history first (populated during current session)
+	for (OrderNode* node = customer_node->info.history.head; node != NULL; node = node->next) {
 		printSingleOrder(node->info);
 		order_count++;
 	}
 
+	// Fall back to orders.txt for completed orders from previous sessions
+	if (order_count == 0) {
+		FILE* file_ptr = fopen("data/orders.txt", "rt");
+		if (file_ptr != NULL) {
+			char line[512];
+			fgets(line, sizeof(line), file_ptr); // skip count header
+			while (fgets(line, sizeof(line), file_ptr) != NULL) {
+				Order order;
+				int priority = 0, shipping_method = 0;
+				int parsed = sscanf(line, "%d,%99[^,],%99[^,],%d,%lld,%d,%d,%99[^\n]",
+					&order.id, order.customer_name, order.product_name,
+					&order.quantity, &order.price, &priority, &shipping_method, order.status);
+				if (parsed != 8) continue;
+				order.priority = (PriorityLevel)priority;
+				order.shipping_method = (ShippingMethod)shipping_method;
+				trimString(order.customer_name);
+				trimString(order.product_name);
+				trimString(order.status);
+				if (_stricmp(order.customer_name, target_name) != 0) continue;
+				if (_stricmp(order.status, "Hoan thanh") != 0 && _stricmp(order.status, "Da giao cho DVVC") != 0) continue;
+				printSingleOrder(order);
+				order_count++;
+			}
+			fclose(file_ptr);
+		}
+	}
+
 	printf("\t\t=============================================================================\n");
-	printf("\n\t\t\t\t\t\tTong don da mua: %d", order_count);
+	if (order_count == 0) {
+		setColor(3);
+		printf("\n\t\t\t\t\t\tKhach hang nay chua co lich su mua hang.");
+		setColor(7);
+	} else {
+		printf("\n\t\t\t\t\t\tTong don da mua: %d", order_count);
+	}
 }
 
 // Auto-upgrade customer tier
@@ -333,21 +361,19 @@ void autoUpgradeCustomerTier(CustomerList* customer_list, int show_log) {
 		node = node->next;
 	}
 
-	// Update tiers
+	// Update tiers — only upgrade, never downgrade (preserves manual tier reductions)
 	node = customer_list->head;
 	while (node != NULL) {
 		Customer* customer = &node->info;
-		
-		if (customer->total_spent >= 10000000) {
-			customer->tier = TIER_EXPRESS;
-		}
-		else if (customer->total_spent >= 3000000) {
-			customer->tier = TIER_VIP;
-		}
-		else {
-			customer->tier = TIER_NORMAL;
-		}
-		
+
+		CustomerTier earned_tier;
+		if (customer->total_spent >= 10000000)     earned_tier = TIER_EXPRESS;
+		else if (customer->total_spent >= 3000000) earned_tier = TIER_VIP;
+		else                                        earned_tier = TIER_NORMAL;
+
+		if (earned_tier > customer->tier)
+			customer->tier = earned_tier;
+
 		node = node->next;
 	}
 

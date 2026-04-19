@@ -1,4 +1,6 @@
-12
+14
+3011,cao tri,aula f75,1,150000,1,1,Hoan thanh
+3012,cao tri,aula f75,10,150000,1,1,Hoan thanh
 3004,KhachHang009,MAN HINH 24 INCH,1,2500000,1,1,Hoan thanh
 3003,KhachHang008,TAI NGHE BLUETOOTH,1,300000,2,0,Hoan thanh
 3006,KhachHang011,RAM 8GB DDR4,1,700000,1,1,Hoan thanh
