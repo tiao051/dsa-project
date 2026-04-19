@@ -22,7 +22,9 @@ void generateNextCustomerId(char* id) {
 	char line[512];
 	int maxId = 100;
 
-	// Skip header line (stored count) and compute next ID from actual records.
+	// Bỏ qua dòng header (số đếm) và quét toàn bộ file để tìm ID lớn nhất.
+	// Cách này tránh xung đột ID khi có bản ghi bị xóa giữa chừng hoặc
+	// khi file được chỉnh sửa bên ngoài ứng dụng.
 	if (fgets(line, sizeof(line), file_ptr) == NULL) {
 		fclose(file_ptr);
 		sprintf(id, "101");
@@ -33,6 +35,7 @@ void generateNextCustomerId(char* id) {
 		char idText[37];
 		if (sscanf(line, "%36[^,]", idText) == 1) {
 			trimString(idText);
+			// Chỉ xử lý ID thuần số; bỏ qua UUID hoặc ID dạng chuỗi khác
 			int validNumber = (idText[0] != '\0');
 			for (int i = 0; idText[i] != '\0'; i++) {
 				if (!isdigit((unsigned char)idText[i])) {
@@ -307,18 +310,20 @@ void viewCustomerPurchaseHistory(CustomerList* customer_list) {
 	int order_count = 0;
 	const char* target_name = customer_node->info.name;
 
-	// Check in-memory history first (populated during current session)
+	// Ưu tiên lịch sử trong bộ nhớ (đơn đã hoàn thành trong phiên hiện tại).
+	// Đây là dữ liệu mới nhất và chính xác nhất trong session.
 	for (OrderNode* node = customer_node->info.history.head; node != NULL; node = node->next) {
 		printSingleOrder(node->info);
 		order_count++;
 	}
 
-	// Fall back to orders.txt for completed orders from previous sessions
+	// Nếu không có đơn trong bộ nhớ, đọc lại từ file để lấy lịch sử các phiên trước.
+	// Chỉ hiển thị đơn đã hoàn thành; đơn đang chờ hoặc đang xử lý bỏ qua.
 	if (order_count == 0) {
 		FILE* file_ptr = fopen("data/orders.txt", "rt");
 		if (file_ptr != NULL) {
 			char line[512];
-			fgets(line, sizeof(line), file_ptr); // skip count header
+			fgets(line, sizeof(line), file_ptr); // Bỏ qua dòng header đếm số bản ghi
 			while (fgets(line, sizeof(line), file_ptr) != NULL) {
 				Order order;
 				int priority = 0, shipping_method = 0;
@@ -354,14 +359,15 @@ void viewCustomerPurchaseHistory(CustomerList* customer_list) {
 void autoUpgradeCustomerTier(CustomerList* customer_list, int show_log) {
 	int count = 0;
 	CustomerNode* node = customer_list->head;
-	
-	// Count total customers
+
 	while (node != NULL) {
 		count++;
 		node = node->next;
 	}
 
-	// Update tiers — only upgrade, never downgrade (preserves manual tier reductions)
+	// Chỉ nâng hạng, không bao giờ hạ hạng tự động.
+	// Điều này bảo toàn trường hợp admin đã thủ công hạ hạng khách hàng:
+	// hạng thực tế (earned_tier) có thể cao hơn hạng hiện tại, nhưng không thể thấp hơn.
 	node = customer_list->head;
 	while (node != NULL) {
 		Customer* customer = &node->info;
@@ -553,9 +559,8 @@ void deleteCustomer(CustomerList* customer_list) {
 	}
 
 	CustomerNode* node = customer_list->head;
-	CustomerNode* prev = NULL;
+	CustomerNode* prev = NULL; // Con trỏ theo dõi node liền trước để nối lại sau khi xóa
 
-	// Find customer
 	while (node != NULL) {
 		int matched = 0;
 		if (!need_phone) {
@@ -572,7 +577,9 @@ void deleteCustomer(CustomerList* customer_list) {
 			confirm = readYesNoChoice("\n\t\t\t\t\t\tBAN CO CHAC CHAN MUON XOA? (Y/N): ");
 
 			if (confirm == 'Y' || confirm == 'y') {
-				// Remove from list
+				// Xóa node khỏi danh sách liên kết đơn:
+				// - Nếu là node đầu (prev == NULL): cập nhật head trỏ sang node tiếp theo
+				// - Ngược lại: nối node trước bỏ qua node hiện tại
 				if (prev == NULL) {
 					customer_list->head = node->next;
 				} else {

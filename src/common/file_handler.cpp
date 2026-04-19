@@ -124,6 +124,8 @@ void saveOrderQueueToFile(const char* filename, OrderQueue* q) {
 void appendOrderToFile(const char* filename, Order* order) {
 	if (order == NULL) return;
 
+	// Nếu file chưa tồn tại, tạo mới với header count = 0 trước khi append.
+	// Không thể dùng "a+t" ngay vì file mới sẽ thiếu dòng header đếm số bản ghi.
 	FILE* file_ptr = fopen(filename, "rt");
 	if (file_ptr == NULL) {
 		file_ptr = fopen(filename, "wt");
@@ -138,6 +140,7 @@ void appendOrderToFile(const char* filename, Order* order) {
 		fclose(file_ptr);
 	}
 
+	// Mở lại ở chế độ append để ghi bản ghi mới vào cuối file
 	file_ptr = fopen(filename, "a+t");
 	if (file_ptr == NULL) {
 		printf("\n\t\t\t\t\t\tKhong the luu don hang vao file %s", filename);
@@ -155,6 +158,9 @@ void appendOrderToFile(const char* filename, Order* order) {
 		order->status);
 	fclose(file_ptr);
 
+	// Mở lại ở chế độ r+t để cập nhật số đếm ở dòng đầu file.
+	// fseek về đầu file rồi ghi đè giá trị mới — đây là cách duy nhất
+	// cập nhật header mà không cần ghi lại toàn bộ file.
 	file_ptr = fopen(filename, "r+t");
 	if (file_ptr == NULL) return;
 
@@ -170,6 +176,7 @@ void loadOrderFile(const char* filename, OrderQueue* q) {
 
 	FILE* file_ptr = fopen(filename, "rt");
 	if (file_ptr == NULL) {
+		// File chưa tồn tại: tạo mới với header rỗng để các lần ghi sau không lỗi
 		file_ptr = fopen(filename, "wt");
 		if (file_ptr != NULL) {
 			fprintf(file_ptr, "0\n");
@@ -192,6 +199,8 @@ void loadOrderFile(const char* filename, OrderQueue* q) {
 		int priority = 0;
 		int shipping_method = 0;
 
+		// Dùng sscanf với format [^,] để đọc từng trường phân cách bằng dấu phẩy.
+		// [^\n] ở cuối để đọc cả chuỗi status có thể chứa khoảng trắng.
 		int parsed = sscanf(line, "%d,%99[^,],%99[^,],%d,%lld,%d,%d,%99[^\n]",
 			&order.id,
 			order.customer_name,
@@ -203,7 +212,7 @@ void loadOrderFile(const char* filename, OrderQueue* q) {
 			order.status);
 
 		if (parsed != 8) {
-			continue;
+			continue; // Bỏ qua dòng bị lỗi/không đủ trường
 		}
 
 		order.priority = (PriorityLevel)priority;
@@ -212,6 +221,8 @@ void loadOrderFile(const char* filename, OrderQueue* q) {
 		trimString(order.product_name);
 		trimString(order.status);
 
+		// Chỉ nạp lại các đơn hàng chưa hoàn thành vào hàng đợi.
+		// Đơn đã giao không cần xử lý tiếp, chỉ dùng để tra cứu lịch sử.
 		if (_stricmp(order.status, "Hoan thanh") == 0 || _stricmp(order.status, "Da giao cho DVVC") == 0) {
 			continue;
 		}
@@ -411,9 +422,12 @@ void updateCustomerCountInFile(const char* filename) {
 		return;
 	}
 
+	// Đếm lại số bản ghi thực tế thay vì tin vào giá trị header hiện tại.
+	// Cách này an toàn hơn: nếu header bị lệch do crash hoặc thao tác thủ công,
+	// hàm sẽ tự sửa lại đúng số lượng.
 	int count = 0;
 	char line[512];
-	if (fgets(line, sizeof(line), file_ptr) != NULL) {
+	if (fgets(line, sizeof(line), file_ptr) != NULL) { // Bỏ qua dòng header cũ
 		while (fgets(line, sizeof(line), file_ptr) != NULL) {
 			char id[37], name[100], phone[100], status[100], extra[256];
 			int tier;
@@ -428,6 +442,7 @@ void updateCustomerCountInFile(const char* filename) {
 		}
 	}
 
+	// Ghi đè số đếm mới vào dòng đầu file
 	fseek(file_ptr, 0, SEEK_SET);
 	fprintf(file_ptr, "%d\n", count);
 
